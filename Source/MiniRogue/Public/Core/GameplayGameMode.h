@@ -3,6 +3,19 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameplayGameMode.generated.h"
 
+USTRUCT(BlueprintType)
+struct FDiceAnimationPath
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FTransform> Transforms; // Transforms at each step of the simulation
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 DieID; // ID to identify which die this path belongs to
+};
+
+
 UCLASS()
 class MINIROGUE_API AGameplayGameMode : public AGameModeBase
 {
@@ -13,6 +26,18 @@ protected:
 	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 
 public:
+	UPROPERTY(EditDefaultsOnly)
+	TSoftClassPtr<AActor> DieClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftClassPtr<AActor> FloorActor;
+
+	UPROPERTY(BlueprintReadOnly)
+	AActor* Die;
+
+	UFUNCTION(BlueprintCallable)
+	void SimulateRoll(TArray<FDiceAnimationPath>& OutAnimationPaths, int32 NumDice);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure="true", Category="MiniRogueGameMode|Seed")
 	const FRandomStream& GetSeed() const { return Seed; }
 
@@ -25,4 +50,9 @@ protected:
 
 private:
 	FRandomStream Seed;
+
+	UPROPERTY()
+	TObjectPtr<UWorld> SimWorld;
+
+	TArray<FDiceAnimationPath> DiceAnimationPaths;
 };
