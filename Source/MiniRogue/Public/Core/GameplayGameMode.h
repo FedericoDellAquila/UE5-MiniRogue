@@ -3,23 +3,15 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameplayGameMode.generated.h"
 
-USTRUCT(BlueprintType)
-struct FDiceAnimationPath
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FTransform> Transforms; // Transforms at each step of the simulation
-
-	UPROPERTY(BlueprintReadOnly)
-	int32 DieID; // ID to identify which die this path belongs to
-};
-
+class USimulationWorldComponent;
 
 UCLASS()
 class MINIROGUE_API AGameplayGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+	AGameplayGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
@@ -35,8 +27,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	AActor* Die;
 
-	UFUNCTION(BlueprintCallable)
-	void SimulateRoll(TArray<FDiceAnimationPath>& OutAnimationPaths, int32 NumDice);
+	// UFUNCTION(BlueprintCallable)
+	// void SimulateRoll(TArray<FDiceAnimationPath>& OutAnimationPaths, int32 NumDice);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure="true", Category="MiniRogueGameMode|Seed")
 	const FRandomStream& GetSeed() const { return Seed; }
@@ -51,8 +43,6 @@ protected:
 private:
 	FRandomStream Seed;
 
-	UPROPERTY()
-	TObjectPtr<UWorld> SimWorld;
-
-	TArray<FDiceAnimationPath> DiceAnimationPaths;
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess))
+	TObjectPtr<USimulationWorldComponent> SimulationWorldComponent;
 };

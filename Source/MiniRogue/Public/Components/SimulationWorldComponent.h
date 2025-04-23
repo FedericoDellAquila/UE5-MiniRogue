@@ -1,13 +1,32 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
-
+﻿#pragma once
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SimulationWorldComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FPhysicsSimulationData
+{
+	GENERATED_BODY()
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+	UPROPERTY(BlueprintReadOnly)
+	AActor* Actor;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 Id;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsAsleep;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FTransform> Steps;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<UPrimitiveComponent*> PrimitiveComponents;
+};
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPhysicsSimulationTick, const TArray<FPhysicsSimulationData>&, PhysicsSimulation);
+
+UCLASS(ClassGroup=(Custom))
 class MINIROGUE_API USimulationWorldComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -16,11 +35,45 @@ public:
 	// Sets default values for this component's properties
 	USimulationWorldComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
+	bool CreateSimulationWorld();
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	UFUNCTION(BlueprintCallable)
+	void CopyStaticActors(TArray<AActor*> InStaticActors);
+
+	UFUNCTION(BlueprintCallable)
+	void CopyPhysicsActors(TArray<AActor*> InPhysicsActors);
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<AActor*> GetStaticActors() const { return StaticActors; }
+
+	UFUNCTION(BlueprintCallable)
+	TArray<AActor*> GetPhysicsActors() const { return PhysicsActors; }
+
+	UFUNCTION(BlueprintCallable)
+	void SimulatePhysics(const FOnPhysicsSimulationTick& OnPhysicsSimulationTick, int32 MaxSteps = 300, float TimeStep = 0.01666666666f, bool bAutoDestroySimulationWorld = true);
+
+	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
+	bool DestroySimulationWorld();
+
+private:
+	UPROPERTY()
+	TObjectPtr<UWorld> SimulationWorld;
+
+	FPhysScene* PhysScene;
+
+	UPROPERTY()
+	TArray<AActor*> StaticActors;
+
+	UPROPERTY()
+	TArray<AActor*> PhysicsActors;
+
+	static void CopyActorProperties(const AActor* SourceActor, AActor* TargetActor);
+	static void CopyPhysicsState(const AActor* SourceActor, const AActor* TargetActor);
+	void DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList) const;
+
+	void SetPhysicsSimulationData(const float TimeStep) const;
 };

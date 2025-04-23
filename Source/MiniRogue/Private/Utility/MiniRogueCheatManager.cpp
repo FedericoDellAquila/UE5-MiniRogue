@@ -8,8 +8,8 @@ static FAutoConsoleCommandWithWorldAndArgs TestCommand(
 	TEXT("Simulates a die roll based on a string of space-separated values. Each numeric value in the provided string is parsed and processed as an individual dice roll result. Non-numeric values are ignored."),
 	FConsoleCommandWithWorldAndArgsDelegate::CreateStatic([](const TArray<FString>& Values, UWorld* World) -> void
 		{
-			const UMiniRogueCheatManager* CheatManager {UUtilityFunctionsLibrary::GetCheatManager(World)};
-			if (!IsValid(CheatManager))
+			UMiniRogueCheatManager* CheatManager {};
+			if (UUtilityFunctionsLibrary::GetCheatManager(World, CheatManager) == false)
 			{
 				LOG_ERROR("CheatManager is invalid!")
 				return;
