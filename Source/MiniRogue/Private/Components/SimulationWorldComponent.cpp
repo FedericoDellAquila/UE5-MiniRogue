@@ -96,16 +96,16 @@ void USimulationWorldComponent::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorCl
 	}
 }
 
-void USimulationWorldComponent::SimulatePhysics(const FOnPhysicsSimulationTick& OnPhysicsSimulationTick, int32 MaxSteps/*= 300*/, float TimeStep/*= 0.01666666666f*/, bool bAutoDestroySimulationWorld/*= true*/)
+void USimulationWorldComponent::PerformPhysicsSimulation(const FOnPhysicsSimulationTick& OnPhysicsSimulationTick, int32 MaxSteps/*= 300*/, float PhysicsStepDeltaTime/*= 0.01666666666f*/, bool bAutoDestroySimulationWorld/*= true*/)
 {
 	if (IsValid(SimulationWorld) == false || PhysScene == nullptr)
 	{
 		return;
 	}
 
-	if (TimeStep <= 0.0f)
+	if (PhysicsStepDeltaTime <= 0.0f)
 	{
-		TimeStep = UUtilityFunctionsLibrary::GetPhysicsStepDeltaTime();
+		PhysicsStepDeltaTime = UUtilityFunctionsLibrary::GetPhysicsStepDeltaTime();
 	}
 
 	TArray<FPhysicsSimulationData> PhysicsSimulations;
@@ -124,7 +124,7 @@ void USimulationWorldComponent::SimulatePhysics(const FOnPhysicsSimulationTick& 
 
 	SimulationWorld->InitializeActorsForPlay(FURL()); // TODO: check if necessary
 
-	SetPhysicsSimulationData(TimeStep);
+	SetPhysicsSimulationData(PhysicsStepDeltaTime);
 
 	SimulationWorld->StartPhysicsSim();
 
@@ -136,31 +136,6 @@ void USimulationWorldComponent::SimulatePhysics(const FOnPhysicsSimulationTick& 
 		PhysScene->StartFrame();
 
 		PhysScene->WaitPhysScenes();
-
-		// Record transforms for this step
-		int32 Sleepers {0};
-		for (int32 i = 0; i < PhysicsSimulations.Num(); i++)
-		{
-			FPhysicsSimulationData& TransformPhysicsSteps = PhysicsSimulations[i];
-			if (IsValid(TransformPhysicsSteps.Actor) && TransformPhysicsSteps.bIsAsleep == false)
-			{
-				TransformPhysicsSteps.Steps.Add(TransformPhysicsSteps.Actor->GetActorTransform());
-
-				FVector Origin;
-				FVector Bounds;
-				TransformPhysicsSteps.Actor->GetActorBounds(true, Origin, Bounds, true);
-				DrawDebugBox(GetWorld(), Origin, Bounds, TransformPhysicsSteps.Actor->GetActorQuat(), FColor::Red, false, 20.0f, 0, 0.1f);
-			}
-			else
-			{
-				Sleepers++;
-
-				if (Sleepers == PhysicsSimulations.Num())
-				{
-					bAllAtRest = true;
-				}
-			}
-		}
 
 		if (StepCount > 0)
 		{
@@ -177,6 +152,25 @@ void USimulationWorldComponent::SimulatePhysics(const FOnPhysicsSimulationTick& 
 				if (Count == 0)
 				{
 					TransformPhysicsSteps.bIsAsleep = true;
+				}
+			}
+		}
+
+		// Record transforms for this step
+		int32 Sleepers {0};
+		for (int32 i = 0; i < PhysicsSimulations.Num(); i++)
+		{
+			FPhysicsSimulationData& TransformPhysicsSteps = PhysicsSimulations[i];
+			if (IsValid(TransformPhysicsSteps.Actor) && TransformPhysicsSteps.bIsAsleep == false)
+			{
+				TransformPhysicsSteps.Steps.Add(TransformPhysicsSteps.Actor->GetActorTransform());
+			}
+			else
+			{
+				Sleepers++;
+				if (Sleepers == PhysicsSimulations.Num())
+				{
+					bAllAtRest = true;
 				}
 			}
 		}

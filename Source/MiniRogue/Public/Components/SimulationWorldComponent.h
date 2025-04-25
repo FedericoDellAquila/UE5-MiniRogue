@@ -47,6 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure="true")
+	UWorld* GetSimulationWorld() const { return SimulationWorld; }
+
 	UFUNCTION(BlueprintCallable)
 	TArray<AActor*> GetStaticActors() const { return StaticActors; }
 
@@ -54,7 +57,7 @@ public:
 	TArray<AActor*> GetPhysicsActors() const { return PhysicsActors; }
 
 	UFUNCTION(BlueprintCallable)
-	void SimulatePhysics(const FOnPhysicsSimulationTick& OnPhysicsSimulationTick, int32 MaxSteps = 300, float TimeStep = 0.01666666666f, bool bAutoDestroySimulationWorld = true);
+	void PerformPhysicsSimulation(const FOnPhysicsSimulationTick& OnPhysicsSimulationTick, int32 MaxSteps = 300, float PhysicsStepDeltaTime = 0.01666666666f, bool bAutoDestroySimulationWorld = true);
 
 	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
 	bool DestroySimulationWorld();

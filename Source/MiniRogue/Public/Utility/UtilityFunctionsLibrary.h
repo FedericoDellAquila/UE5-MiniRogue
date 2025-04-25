@@ -20,4 +20,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure="true")
 	static float GetPhysicsStepDeltaTime();
+
+	UFUNCTION(BlueprintCallable)
+	static FRotator RotateFaces(int32 Value);
+
+	UFUNCTION(BlueprintCallable)
+	static void DrawCubeMeshEdges(UStaticMeshComponent* MeshComp);
+
+	UFUNCTION(BlueprintCallable)
+	static void DrawBoxEdgesFromMeshComponent(UStaticMeshComponent* MeshComp, FColor Color = FColor::Blue, float Duration = 5.0f, float Thickness = 1.0f);
+
+	UFUNCTION(BlueprintCallable)
+	static void DrawPlanes(UStaticMeshComponent* MeshComp, FColor Color = FColor::Green, float Duration = 5.0f);
 };
