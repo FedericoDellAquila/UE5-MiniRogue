@@ -265,12 +265,12 @@ void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActo
 	const FTransform Transform {SourceActor->GetActorTransform()};
 	UClass* ActorClass {SourceActor->GetClass()};
 
-	AActor* NewActor {SimulationWorld->SpawnActor<AActor>(ActorClass, Transform, SpawnParams)};
-	if (NewActor)
-	{
-		CopyActorProperties(SourceActor, NewActor);
-		CopyPhysicsState(SourceActor, NewActor);
-	}
+	AActor* NewActor {SimulationWorld->SpawnActor<AActor>(ActorClass, SpawnParams)};
+	// if (NewActor)
+	// {
+	// 	CopyActorProperties(SourceActor, NewActor);
+	// 	CopyPhysicsState(SourceActor, NewActor);
+	// }
 
 	DestinationList.Emplace(NewActor);
 
@@ -281,7 +281,9 @@ void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActo
 	UStaticMeshComponent* Prim = Cast<UStaticMeshComponent>(NewActor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	Prim->GetLocalBounds(Origin, Bounds);
 
-	DrawDebugBox(GetWorld(), Prim->GetComponentLocation(), Bounds - Origin, Prim->GetComponentRotation().Quaternion(), FColor::Green, true, 20.0f, 0, 10.0f);
+	// DrawDebugBox(GetWorld(), Prim->GetComponentLocation(), Bounds - Origin, Prim->GetComponentRotation().Quaternion(), FColor::Green, true, 20.0f, 0, 1.0f);
+
+	UUtilityFunctionsLibrary::DrawBoxEdgesFromMeshComponent(GetWorld(), Transform, Prim, FLinearColor::Red, 20.0f, 5.0f);
 }
 
 void USimulationWorldComponent::SetPhysicsSimulationData(const float TimeStep) const
