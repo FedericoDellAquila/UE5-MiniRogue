@@ -35,7 +35,7 @@ ADie::ADie()
 		}
 	}
 
-	FacesRootComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FacesRootComponent"));
+	FacesRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("FacesRootComponent"));
 	if (IsValid(FacesRootComponent))
 	{
 		FacesRootComponent->SetupAttachment(MeshComponent);

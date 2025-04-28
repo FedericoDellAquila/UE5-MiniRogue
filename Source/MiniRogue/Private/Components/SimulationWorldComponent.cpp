@@ -34,6 +34,7 @@ bool USimulationWorldComponent::CreateSimulationWorld()
 	SimulationWorld = UWorld::CreateWorld(EWorldType::Game, false, UniqueWorldName, GetTransientPackage(), true, ERHIFeatureLevel::Num, &InitValues);
 	if (IsValid(SimulationWorld) == false)
 	{
+		LOG_ERROR("Failed to create simulation world.")
 		return false;
 	}
 	SimulationWorld->SetShouldTick(false);
@@ -97,12 +98,13 @@ TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulati
 {
 	if (IsValid(SimulationWorld) == false || SimulationWorld->GetPhysicsScene() == nullptr)
 	{
+		LOG_ERROR("SimulationWorld is nullptr or PhysicsScene is nullptr.")
 		return {};
 	}
 
 	if (MaxSteps <= 0)
 	{
-		LOG_WARNING("MaxSteps <= 0.")
+		LOG_ERROR("MaxSteps <= 0.")
 		return {};
 	}
 
@@ -116,26 +118,28 @@ TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulati
 		PhysicsSimulation.Actor = Actor;
 		PhysicsSimulation.bIsAsleep = false;
 		PhysicsSimulation.Id = i;
-		Actor->GetComponents(UPrimitiveComponent::StaticClass(), PhysicsSimulation.PrimitiveComponents, true);
+		Actor->GetComponents(UMeshComponent::StaticClass(), PhysicsSimulation.MeshComponents, true);
 		PhysicsSimulations.Emplace(PhysicsSimulation);
 	}
 
 	SetUpPhysicsSimulationFrame(PhysicsSimulationParameters);
 
-	SimulationWorld->StartPhysicsSim();
 
 	FPhysScene* PhysicsScene {SimulationWorld->GetPhysicsScene()};
-	bool bAllAtRest {false};
-	int32 StepCount = 0;
-	while (!bAllAtRest && StepCount < MaxSteps)
+	bool bAllPhysicsActorsAtRest {false};
+	int32 StepsCount {0};
+	int32 Sleepers {0};
+
+	SimulationWorld->StartPhysicsSim();
+	while (!bAllPhysicsActorsAtRest && StepsCount < MaxSteps)
 	{
 		PhysicsScene->StartFrame();
 		PhysicsScene->WaitPhysScenes();
 
 		for (FPhysicsSimulationData& TransformPhysicsSteps : PhysicsSimulations)
 		{
-			int32 Count {TransformPhysicsSteps.PrimitiveComponents.Num()};
-			for (UPrimitiveComponent* MeshComp : TransformPhysicsSteps.PrimitiveComponents)
+			int32 Count {TransformPhysicsSteps.MeshComponents.Num()};
+			for (UPrimitiveComponent* MeshComp : TransformPhysicsSteps.MeshComponents)
 			{
 				if (MeshComp->IsAnyRigidBodyAwake() == false)
 				{
@@ -145,11 +149,16 @@ TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulati
 			if (Count == 0)
 			{
 				TransformPhysicsSteps.bIsAsleep = true;
+
+				Sleepers++;
+				if (Sleepers == PhysicsSimulations.Num())
+				{
+					bAllPhysicsActorsAtRest = true;
+				}
 			}
 		}
 
 		// Record transforms for this step
-		int32 Sleepers {0};
 		for (int32 i = 0; i < PhysicsSimulations.Num(); i++)
 		{
 			FPhysicsSimulationData& TransformPhysicsSteps = PhysicsSimulations[i];
@@ -157,18 +166,10 @@ TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulati
 			{
 				TransformPhysicsSteps.Steps.Add(TransformPhysicsSteps.Actor->GetActorTransform());
 			}
-			else
-			{
-				Sleepers++;
-				if (Sleepers == PhysicsSimulations.Num())
-				{
-					bAllAtRest = true;
-				}
-			}
 		}
 
 		PhysicsScene->EndFrame();
-		StepCount++;
+		StepsCount++;
 	}
 
 	SimulationWorld->FinishPhysicsSim();
@@ -201,11 +202,13 @@ void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActo
 {
 	if (IsValid(SimulationWorld) == false)
 	{
+		LOG_WARNING("SimulationWorld is nullptr.")
 		return;
 	}
 
 	if (IsValid(SourceActor) == false)
 	{
+		LOG_WARNING("SourceActor is nullptr.")
 		return;
 	}
 
@@ -221,11 +224,6 @@ void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActo
 
 void USimulationWorldComponent::SetUpPhysicsSimulationFrame(FPhysicsSimulationParameters& PhysicsSimulationParameters) const
 {
-	if (IsValid(SimulationWorld) == false || SimulationWorld->GetPhysicsScene() == nullptr)
-	{
-		return;
-	}
-
 	if (PhysicsSimulationParameters.DeltaSeconds <= 0.0f)
 	{
 		PhysicsSimulationParameters.DeltaSeconds = 1.0f / 60.0f;

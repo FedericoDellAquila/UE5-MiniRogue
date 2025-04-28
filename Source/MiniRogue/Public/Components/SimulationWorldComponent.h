@@ -54,7 +54,7 @@ struct FPhysicsSimulationData
 	TArray<FTransform> Steps;
 
 	UPROPERTY(BlueprintReadOnly)
-	TArray<UPrimitiveComponent*> PrimitiveComponents;
+	TArray<UMeshComponent*> MeshComponents;
 
 	UPROPERTY()
 	bool bIsAsleep;
