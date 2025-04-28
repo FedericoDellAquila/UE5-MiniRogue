@@ -14,8 +14,10 @@ private:
 	static void LaunchPackagedBuildButton(FMenuBuilder& MenuBuilder);
 	static void ClearPackagedFolder(const FString& PackagedProjectPath);
 	static void PackagedProject(const FString& Configuration, const FString& PackagedProjectPath, const FString& ExtraParameters = TEXT(""));
-	static void PackagedProjectDebug(FMenuBuilder& MenuBuilder);
-	static void PackagedProjectRelease(FMenuBuilder& MenuBuilder);
+	static void PackagedProjectDevelopment(FMenuBuilder& MenuBuilder);
+	static void PackagedProjectShipping(FMenuBuilder& MenuBuilder);
 	static void PackagingToolsSection(FMenuBuilder& MenuBuilder);
+	static void DevelopmentToolsSection(FMenuBuilder& MenuBuilder);
 	static void PackageProjectButton(FMenuBuilder& MenuBuilder);
+	static void ShowToDosListButton(FMenuBuilder& MenuBuilder);
 };

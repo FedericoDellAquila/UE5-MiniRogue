@@ -30,6 +30,7 @@ void FMiniRogueEditorModule::SetupEditorTabs()
 				FNewMenuDelegate::CreateLambda([](FMenuBuilder& MenuBuilder) -> void
 				{
 					PackagingToolsSection(MenuBuilder);
+					DevelopmentToolsSection(MenuBuilder);
 				}),
 				TEXT("MiniRogueTab")
 			);
@@ -140,7 +141,7 @@ void FMiniRogueEditorModule::PackagedProject(const FString& Configuration, const
 	);
 }
 
-void FMiniRogueEditorModule::PackagedProjectDebug(FMenuBuilder& MenuBuilder)
+void FMiniRogueEditorModule::PackagedProjectDevelopment(FMenuBuilder& MenuBuilder)
 {
 	const FString PackagedProjectPath {UMiniRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path};
 
@@ -151,23 +152,23 @@ void FMiniRogueEditorModule::PackagedProjectDebug(FMenuBuilder& MenuBuilder)
 		FUIAction(FExecuteAction::CreateLambda([PackagedProjectPath]() -> void
 		{
 			PackagedProject(TEXT("Development"), PackagedProjectPath);
-		}))
-	);
+		})),
+		TEXT("PackagedProjectDevelopmentButton"));
 }
 
-void FMiniRogueEditorModule::PackagedProjectRelease(FMenuBuilder& MenuBuilder)
+void FMiniRogueEditorModule::PackagedProjectShipping(FMenuBuilder& MenuBuilder)
 {
 	const FString PackagedProjectPath {UMiniRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path};
 
 	MenuBuilder.AddMenuEntry(
-		FText::FromString(TEXT("Release")),
-		FText::FromString(FString::Printf(TEXT("Build the project in Release configuration at path %s."), *PackagedProjectPath)),
+		FText::FromString(TEXT("Shipping")),
+		FText::FromString(FString::Printf(TEXT("Build the project in Shipping configuration at path %s."), *PackagedProjectPath)),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("ClassIcon.PlayerController")),
 		FUIAction(FExecuteAction::CreateLambda([PackagedProjectPath]() -> void
 		{
 			PackagedProject(TEXT("Shipping"), PackagedProjectPath, TEXT("-nodebuginfo"));
-		}))
-	);
+		})),
+		TEXT("PackagedProjectShippingButton"));
 }
 
 void FMiniRogueEditorModule::PackagingToolsSection(FMenuBuilder& MenuBuilder)
@@ -180,6 +181,15 @@ void FMiniRogueEditorModule::PackagingToolsSection(FMenuBuilder& MenuBuilder)
 	MenuBuilder.EndSection();
 }
 
+void FMiniRogueEditorModule::DevelopmentToolsSection(FMenuBuilder& MenuBuilder)
+{
+	MenuBuilder.BeginSection(NAME_None, LOCTEXT("Development Tools", "Development Tools"));
+
+	ShowToDosListButton(MenuBuilder);
+
+	MenuBuilder.EndSection();
+}
+
 void FMiniRogueEditorModule::PackageProjectButton(FMenuBuilder& MenuBuilder)
 {
 	MenuBuilder.AddSubMenu(
@@ -187,12 +197,41 @@ void FMiniRogueEditorModule::PackageProjectButton(FMenuBuilder& MenuBuilder)
 		FText::FromString(TEXT("Package the project with a specific configuration.")),
 		FNewMenuDelegate::CreateLambda([](FMenuBuilder& SubMenuBuilder) -> void
 		{
-			PackagedProjectDebug(SubMenuBuilder);
-			PackagedProjectRelease(SubMenuBuilder);
+			PackagedProjectDevelopment(SubMenuBuilder);
+			PackagedProjectShipping(SubMenuBuilder);
 		}),
 		false,
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("MainFrame.PackageProject"))
 	);
+}
+
+void FMiniRogueEditorModule::ShowToDosListButton(FMenuBuilder& MenuBuilder)
+{
+	MenuBuilder.AddMenuEntry(
+		FText::FromString(TEXT("TODO List")),
+		FText::FromString(TEXT("Display a list of things to do.")),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("Level.SaveModifiedHighlightIcon16x")),
+		FUIAction(FExecuteAction::CreateLambda([]() -> void
+			{
+				FString ToDoList {};
+
+				if (UMiniRogueEditorSettings::Get()->ToDoList.IsEmpty() == false)
+				{
+					for (const FString& Todo : UMiniRogueEditorSettings::Get()->ToDoList)
+					{
+						ToDoList.Append(FString::Printf(TEXT("- %s\n"), *Todo));
+					}
+					ToDoList.RemoveAt(ToDoList.Len() - 1, 1);
+				}
+				else
+				{
+					ToDoList = TEXT("There are no TODOs to display.");
+				}
+
+				FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::Ok, FText::FromString(ToDoList), FText::FromString({TEXT("TODO List")}));
+			}
+		)),
+		TEXT("ShowToDosListButton"));
 }
 
 #undef LOCTEXT_NAMESPACE
