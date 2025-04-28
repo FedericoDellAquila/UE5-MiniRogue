@@ -1,6 +1,5 @@
 ﻿#include "Utility/UtilityFunctionsLibrary.h"
 #include "Core/GameplayGameMode.h"
-#include "PhysicsEngine/PhysicsSettings.h"
 #include "Utility/MiniRogueCheatManager.h"
 
 bool UUtilityFunctionsLibrary::GetGameplayGameMode(UObject* WorldContextObject, AGameplayGameMode*& OutGameMode)
@@ -15,13 +14,12 @@ bool UUtilityFunctionsLibrary::GetCheatManager(UObject* WorldContextObject, UMin
 	return IsValid(OutCheatManager);
 }
 
-float UUtilityFunctionsLibrary::GetPhysicsStepDeltaTime()
+float UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime()
 {
-	const UPhysicsSettings* PhysicsSettings {UPhysicsSettings::Get()};
-	return PhysicsSettings->MaxSubstepDeltaTime;
+	return 1.0f / 60.0f;
 }
 
-void UUtilityFunctionsLibrary::DrawBoxEdgesFromMeshComponent(UWorld* World, FTransform Transform, UStaticMeshComponent* MeshComp, FLinearColor Color, float Duration, float Thickness)
+void UUtilityFunctionsLibrary::DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform, UStaticMeshComponent* MeshComp, FLinearColor Color, float Duration, float Thickness)
 {
 	if (IsValid(MeshComp) == false || IsValid(MeshComp->GetStaticMesh()) == false)
 	{
@@ -60,8 +58,9 @@ void UUtilityFunctionsLibrary::DrawBoxEdgesFromMeshComponent(UWorld* World, FTra
 	};
 
 	// Draw the lines
+	const UWorld* TargetWorld {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
 	for (const auto& Edge : EdgeIndices)
 	{
-		DrawDebugLine(World, LocalCorners[Edge[0]], LocalCorners[Edge[1]], Color.ToRGBE(), false, Duration, 0, Thickness);
+		DrawDebugLine(TargetWorld, LocalCorners[Edge[0]], LocalCorners[Edge[1]], Color.ToRGBE(), false, Duration, 0, Thickness);
 	}
 }

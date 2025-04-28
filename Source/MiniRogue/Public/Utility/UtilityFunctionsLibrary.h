@@ -19,8 +19,8 @@ public:
 	static bool GetCheatManager(UObject* WorldContextObject, UMiniRogueCheatManager*& OutCheatManager);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure="true")
-	static float GetPhysicsStepDeltaTime();
+	static float GetDefaultPhysicsStepDeltaTime();
 
-	UFUNCTION(BlueprintCallable)
-	static void DrawBoxEdgesFromMeshComponent(UWorld* World, FTransform Transform, UStaticMeshComponent* MeshComp, FLinearColor Color = FLinearColor::Blue, float Duration = 5.0f, float Thickness = 0.2f);
+	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
+	static void DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform, UStaticMeshComponent* MeshComp, FLinearColor Color = FLinearColor::Blue, float Duration = 5.0f, float Thickness = 0.2f);
 };

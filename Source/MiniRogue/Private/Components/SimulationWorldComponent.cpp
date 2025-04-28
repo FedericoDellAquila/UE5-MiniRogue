@@ -1,11 +1,9 @@
 ﻿#include "Components/SimulationWorldComponent.h"
 
 #include "Physics/Experimental/PhysScene_Chaos.h"
-#include "PhysicsEngine/PhysicsSettings.h"
-#include "Utility/UtilityFunctionsLibrary.h"
+#include "Utility/Log.h"
 
 USimulationWorldComponent::USimulationWorldComponent()
-	: PhysScene(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -18,7 +16,6 @@ bool USimulationWorldComponent::CreateSimulationWorld()
 	}
 
 	// Create a brand new world with a unique name and transient package
-	UPackage* TransientPackage {GetTransientPackage()};
 	const FName UniqueWorldName {MakeUniqueObjectName(nullptr, UWorld::StaticClass(), TEXT("SimulationWorld"))};
 
 	const UWorld::InitializationValues InitValues {
@@ -27,23 +24,23 @@ bool USimulationWorldComponent::CreateSimulationWorld()
 		.RequiresHitProxies(false)
 		.CreateNavigation(false)
 		.CreateAISystem(false)
-		.ShouldSimulatePhysics(true)
+		.ShouldSimulatePhysics(false)
 		.EnableTraceCollision(true)
-		.CreatePhysicsScene(true)
+		.SetTransactional(false)
+		.CreateFXSystem(false)
+		.SetDefaultGameMode(nullptr)
 	};
 
-	SimulationWorld = UWorld::CreateWorld(EWorldType::Game, false, UniqueWorldName, TransientPackage, true, ERHIFeatureLevel::Num, &InitValues);
+	SimulationWorld = UWorld::CreateWorld(EWorldType::Game, false, UniqueWorldName, GetTransientPackage(), true, ERHIFeatureLevel::Num, &InitValues);
 	if (IsValid(SimulationWorld) == false)
 	{
 		return false;
 	}
+	SimulationWorld->SetShouldTick(false);
 
 	// Set world context
 	FWorldContext& SimulationWorldContext {GEngine->CreateNewWorldContext(EWorldType::Game)};
 	SimulationWorldContext.SetCurrentWorld(SimulationWorld);
-	SimulationWorld->SetShouldTick(false);
-
-	PhysScene = SimulationWorld->GetPhysicsScene();
 
 	return IsValid(SimulationWorld);
 }
@@ -96,16 +93,17 @@ void USimulationWorldComponent::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorCl
 	}
 }
 
-void USimulationWorldComponent::PerformPhysicsSimulation(const FOnPhysicsSimulationTick& OnPhysicsSimulationTick, int32 MaxSteps/*= 300*/, float PhysicsStepDeltaTime/*= 0.01666666666f*/, bool bAutoDestroySimulationWorld/*= true*/)
+TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps/*= 300*/, bool bAutoDestroySimulationWorld/*= true*/)
 {
-	if (IsValid(SimulationWorld) == false || PhysScene == nullptr)
+	if (IsValid(SimulationWorld) == false || SimulationWorld->GetPhysicsScene() == nullptr)
 	{
-		return;
+		return {};
 	}
 
-	if (PhysicsStepDeltaTime <= 0.0f)
+	if (MaxSteps <= 0)
 	{
-		PhysicsStepDeltaTime = UUtilityFunctionsLibrary::GetPhysicsStepDeltaTime();
+		LOG_WARNING("MaxSteps <= 0.")
+		return {};
 	}
 
 	TArray<FPhysicsSimulationData> PhysicsSimulations;
@@ -122,37 +120,31 @@ void USimulationWorldComponent::PerformPhysicsSimulation(const FOnPhysicsSimulat
 		PhysicsSimulations.Emplace(PhysicsSimulation);
 	}
 
-	SimulationWorld->InitializeActorsForPlay(FURL()); // TODO: check if necessary
-
-	SetPhysicsSimulationData(PhysicsStepDeltaTime);
+	SetUpPhysicsSimulationFrame(PhysicsSimulationParameters);
 
 	SimulationWorld->StartPhysicsSim();
 
+	FPhysScene* PhysicsScene {SimulationWorld->GetPhysicsScene()};
 	bool bAllAtRest {false};
 	int32 StepCount = 0;
-
 	while (!bAllAtRest && StepCount < MaxSteps)
 	{
-		PhysScene->StartFrame();
+		PhysicsScene->StartFrame();
+		PhysicsScene->WaitPhysScenes();
 
-		PhysScene->WaitPhysScenes();
-
-		if (StepCount > 0)
+		for (FPhysicsSimulationData& TransformPhysicsSteps : PhysicsSimulations)
 		{
-			for (FPhysicsSimulationData& TransformPhysicsSteps : PhysicsSimulations)
+			int32 Count {TransformPhysicsSteps.PrimitiveComponents.Num()};
+			for (UPrimitiveComponent* MeshComp : TransformPhysicsSteps.PrimitiveComponents)
 			{
-				int32 Count {TransformPhysicsSteps.PrimitiveComponents.Num()};
-				for (UPrimitiveComponent* MeshComp : TransformPhysicsSteps.PrimitiveComponents)
+				if (MeshComp->IsAnyRigidBodyAwake() == false)
 				{
-					if (MeshComp->IsAnyRigidBodyAwake() == false)
-					{
-						Count--;
-					}
+					Count--;
 				}
-				if (Count == 0)
-				{
-					TransformPhysicsSteps.bIsAsleep = true;
-				}
+			}
+			if (Count == 0)
+			{
+				TransformPhysicsSteps.bIsAsleep = true;
 			}
 		}
 
@@ -175,7 +167,7 @@ void USimulationWorldComponent::PerformPhysicsSimulation(const FOnPhysicsSimulat
 			}
 		}
 
-		PhysScene->EndFrame();
+		PhysicsScene->EndFrame();
 		StepCount++;
 	}
 
@@ -186,7 +178,7 @@ void USimulationWorldComponent::PerformPhysicsSimulation(const FOnPhysicsSimulat
 		DestroySimulationWorld();
 	}
 
-	OnPhysicsSimulationTick.Execute(PhysicsSimulations);
+	return PhysicsSimulations;
 }
 
 bool USimulationWorldComponent::DestroySimulationWorld()
@@ -194,56 +186,15 @@ bool USimulationWorldComponent::DestroySimulationWorld()
 	if (IsValid(SimulationWorld))
 	{
 		GEngine->DestroyWorldContext(SimulationWorld);
+		SimulationWorld->RemoveFromRoot();
 		SimulationWorld->DestroyWorld(false);
 		SimulationWorld = nullptr;
-		PhysScene = nullptr;
 
 		// Clear static and physics actors
 		StaticActors.Empty();
 		PhysicsActors.Empty();
 	}
 	return IsValid(SimulationWorld) == false;
-}
-
-void USimulationWorldComponent::CopyActorProperties(const AActor* SourceActor, AActor* TargetActor)
-{
-	if (!SourceActor || !TargetActor)
-	{
-		return;
-	}
-
-	for (TFieldIterator<FProperty> PropIt(SourceActor->GetClass()); PropIt; ++PropIt)
-	{
-		if (const FProperty* Property = *PropIt; !(Property->PropertyFlags & CPF_Transient))
-		{
-			const void* SourceValue = Property->ContainerPtrToValuePtr<void>(SourceActor);
-			void* TargetValue = Property->ContainerPtrToValuePtr<void>(TargetActor);
-			Property->CopyCompleteValue(TargetValue, SourceValue);
-		}
-	}
-}
-
-void USimulationWorldComponent::CopyPhysicsState(const AActor* SourceActor, const AActor* TargetActor)
-{
-	TArray<UPrimitiveComponent*> SourceComponents;
-	SourceActor->GetComponents<UPrimitiveComponent>(SourceComponents);
-
-	TArray<UPrimitiveComponent*> TargetComponents;
-	TargetActor->GetComponents<UPrimitiveComponent>(TargetComponents);
-
-	for (int32 i = 0; i < SourceComponents.Num() && i < TargetComponents.Num(); ++i)
-	{
-		UPrimitiveComponent* SourcePrim {SourceComponents[i]};
-		UPrimitiveComponent* TargetPrim {TargetComponents[i]};
-
-		if (SourcePrim->IsSimulatingPhysics())
-		{
-			TargetPrim->SetSimulatePhysics(SourcePrim->IsSimulatingPhysics());
-			TargetPrim->SetPhysicsLinearVelocity(SourcePrim->GetPhysicsLinearVelocity());
-			TargetPrim->SetPhysicsAngularVelocityInDegrees(SourcePrim->GetPhysicsAngularVelocityInDegrees());
-			TargetPrim->SetWorldTransform(SourcePrim->GetComponentTransform());
-		}
-	}
 }
 
 void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList) const
@@ -258,48 +209,34 @@ void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActo
 		return;
 	}
 
+	UClass* SourceActorClass {SourceActor->GetClass()};
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Template = SourceActor;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	const FTransform Transform {SourceActor->GetActorTransform()};
-	UClass* ActorClass {SourceActor->GetClass()};
-
-	AActor* NewActor {SimulationWorld->SpawnActor<AActor>(ActorClass, SpawnParams)};
-	// if (NewActor)
-	// {
-	// 	CopyActorProperties(SourceActor, NewActor);
-	// 	CopyPhysicsState(SourceActor, NewActor);
-	// }
-
+	AActor* NewActor {SimulationWorld->SpawnActor<AActor>(SourceActorClass, SpawnParams)};
 	DestinationList.Emplace(NewActor);
-
-	FVector Origin;
-	FVector Bounds;
-	NewActor->GetActorBounds(true, Origin, Bounds, false);
-
-	UStaticMeshComponent* Prim = Cast<UStaticMeshComponent>(NewActor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	Prim->GetLocalBounds(Origin, Bounds);
-
-	// DrawDebugBox(GetWorld(), Prim->GetComponentLocation(), Bounds - Origin, Prim->GetComponentRotation().Quaternion(), FColor::Green, true, 20.0f, 0, 1.0f);
-
-	UUtilityFunctionsLibrary::DrawBoxEdgesFromMeshComponent(GetWorld(), Transform, Prim, FLinearColor::Red, 20.0f, 5.0f);
 }
 
-void USimulationWorldComponent::SetPhysicsSimulationData(const float TimeStep) const
+void USimulationWorldComponent::SetUpPhysicsSimulationFrame(FPhysicsSimulationParameters& PhysicsSimulationParameters) const
 {
-	if (IsValid(SimulationWorld) == false || PhysScene == nullptr)
+	if (IsValid(SimulationWorld) == false || SimulationWorld->GetPhysicsScene() == nullptr)
 	{
 		return;
 	}
 
-	const FVector Gravity {FVector {0.0f, 0.0f, SimulationWorld->GetGravityZ()}};
-	const UPhysicsSettings* PhysicsSettings = UPhysicsSettings::Get();
+	if (PhysicsSimulationParameters.DeltaSeconds <= 0.0f)
+	{
+		PhysicsSimulationParameters.DeltaSeconds = 1.0f / 60.0f;
+	}
 
-	PhysScene->SetUpForFrame(&Gravity, TimeStep,
-		PhysicsSettings->MinPhysicsDeltaTime,
-		PhysicsSettings->MaxPhysicsDeltaTime,
-		PhysicsSettings->MaxSubstepDeltaTime,
-		PhysicsSettings->MaxSubsteps,
-		PhysicsSettings->bSubstepping);
+	SimulationWorld->GetPhysicsScene()->SetUpForFrame(
+		&PhysicsSimulationParameters.Gravity,
+		PhysicsSimulationParameters.DeltaSeconds,
+		PhysicsSimulationParameters.MinPhysicsDeltaTime,
+		PhysicsSimulationParameters.MaxPhysicsDeltaTime,
+		PhysicsSimulationParameters.MaxSubstepDeltaTime,
+		PhysicsSimulationParameters.MaxSubsteps,
+		PhysicsSimulationParameters.bSubstepping);
 }

@@ -4,6 +4,42 @@
 #include "SimulationWorldComponent.generated.h"
 
 USTRUCT(BlueprintType)
+struct FPhysicsSimulationParameters
+{
+	GENERATED_BODY()
+
+	FPhysicsSimulationParameters()
+		: Gravity(FVector(0.0f, 0.0f, -980.0f))
+		, DeltaSeconds(1.0f / 60.0f)
+		, MinPhysicsDeltaTime(0)
+		, MaxPhysicsDeltaTime(1.0f / 30.0f)
+		, MaxSubstepDeltaTime(1.0f / 60.0f)
+		, MaxSubsteps(6)
+		, bSubstepping(false) {}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Gravity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DeltaSeconds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MinPhysicsDeltaTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxPhysicsDeltaTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxSubstepDeltaTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaxSubsteps;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bSubstepping;
+};
+
+USTRUCT(BlueprintType)
 struct FPhysicsSimulationData
 {
 	GENERATED_BODY()
@@ -15,16 +51,14 @@ struct FPhysicsSimulationData
 	int32 Id;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool bIsAsleep;
-
-	UPROPERTY(BlueprintReadOnly)
 	TArray<FTransform> Steps;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<UPrimitiveComponent*> PrimitiveComponents;
-};
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPhysicsSimulationTick, const TArray<FPhysicsSimulationData>&, PhysicsSimulation);
+	UPROPERTY()
+	bool bIsAsleep;
+};
 
 UCLASS(ClassGroup=(Custom))
 class MINIROGUE_API USimulationWorldComponent : public UActorComponent
@@ -57,7 +91,7 @@ public:
 	TArray<AActor*> GetPhysicsActors() const { return PhysicsActors; }
 
 	UFUNCTION(BlueprintCallable)
-	void PerformPhysicsSimulation(const FOnPhysicsSimulationTick& OnPhysicsSimulationTick, int32 MaxSteps = 300, float PhysicsStepDeltaTime = 0.01666666666f, bool bAutoDestroySimulationWorld = true);
+	TArray<FPhysicsSimulationData> PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps = 500, bool bAutoDestroySimulationWorld = true);
 
 	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
 	bool DestroySimulationWorld();
@@ -66,17 +100,13 @@ private:
 	UPROPERTY()
 	TObjectPtr<UWorld> SimulationWorld;
 
-	FPhysScene* PhysScene;
-
 	UPROPERTY()
 	TArray<AActor*> StaticActors;
 
 	UPROPERTY()
 	TArray<AActor*> PhysicsActors;
 
-	static void CopyActorProperties(const AActor* SourceActor, AActor* TargetActor);
-	static void CopyPhysicsState(const AActor* SourceActor, const AActor* TargetActor);
 	void DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList) const;
 
-	void SetPhysicsSimulationData(const float TimeStep) const;
+	void SetUpPhysicsSimulationFrame(FPhysicsSimulationParameters& PhysicsSimulationParameters) const;
 };
