@@ -1,14 +1,11 @@
-﻿#include "Components/SimulationWorldComponent.h"
-
+﻿#include "Components/PhysicsSimulationWorldManager.h"
 #include "Physics/Experimental/PhysScene_Chaos.h"
 #include "Utility/Log.h"
 
-USimulationWorldComponent::USimulationWorldComponent()
-{
-	PrimaryComponentTick.bCanEverTick = true;
-}
+UPhysicsWorldSimulationManager::UPhysicsWorldSimulationManager()
+{}
 
-bool USimulationWorldComponent::CreateSimulationWorld()
+bool UPhysicsWorldSimulationManager::CreateSimulationWorld()
 {
 	if (IsValid(SimulationWorld))
 	{
@@ -16,9 +13,10 @@ bool USimulationWorldComponent::CreateSimulationWorld()
 	}
 
 	// Create a brand new world with a unique name and transient package
-	const FName UniqueWorldName {MakeUniqueObjectName(nullptr, UWorld::StaticClass(), TEXT("SimulationWorld"))};
+	const FName UniqueWorldName {MakeUniqueObjectName(this, UWorld::StaticClass(), TEXT("SimulationWorld"))};
 
-	const UWorld::InitializationValues InitValues {
+	const UWorld::InitializationValues InitValues
+	{
 		UWorld::InitializationValues()
 		.AllowAudioPlayback(false)
 		.RequiresHitProxies(false)
@@ -46,7 +44,7 @@ bool USimulationWorldComponent::CreateSimulationWorld()
 	return IsValid(SimulationWorld);
 }
 
-void USimulationWorldComponent::CopyStaticActors(TArray<AActor*> InStaticActors)
+void UPhysicsWorldSimulationManager::CopyStaticActors(TArray<AActor*> InStaticActors)
 {
 	if (InStaticActors.Num() == 0)
 	{
@@ -59,7 +57,7 @@ void USimulationWorldComponent::CopyStaticActors(TArray<AActor*> InStaticActors)
 	}
 }
 
-void USimulationWorldComponent::CopyPhysicsActors(TArray<AActor*> InPhysicsActors)
+void UPhysicsWorldSimulationManager::CopyPhysicsActors(TArray<AActor*> InPhysicsActors)
 {
 	if (InPhysicsActors.Num() == 0)
 	{
@@ -72,15 +70,17 @@ void USimulationWorldComponent::CopyPhysicsActors(TArray<AActor*> InPhysicsActor
 	}
 }
 
-void USimulationWorldComponent::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms)
+void UPhysicsWorldSimulationManager::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms)
 {
 	if (IsValid(SimulationWorld) == false)
 	{
+		LOG_ERROR("SimulationWorld is nullptr.")
 		return;
 	}
 
 	if (ActorClass.IsNull())
 	{
+		LOG_ERROR("ActorClass is nullptr.")
 		return;
 	}
 
@@ -94,7 +94,7 @@ void USimulationWorldComponent::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorCl
 	}
 }
 
-TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps/*= 300*/, bool bAutoDestroySimulationWorld/*= true*/)
+TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps/*= 300*/, bool bAutoDestroySimulationWorld/*= true*/)
 {
 	if (IsValid(SimulationWorld) == false || SimulationWorld->GetPhysicsScene() == nullptr)
 	{
@@ -131,7 +131,7 @@ TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulati
 	int32 Sleepers {0};
 
 	SimulationWorld->StartPhysicsSim();
-	while (!bAllPhysicsActorsAtRest && StepsCount < MaxSteps)
+	while (bAllPhysicsActorsAtRest == false && StepsCount < MaxSteps)
 	{
 		PhysicsScene->StartFrame();
 		PhysicsScene->WaitPhysScenes();
@@ -159,12 +159,11 @@ TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulati
 		}
 
 		// Record transforms for this step
-		for (int32 i = 0; i < PhysicsSimulations.Num(); i++)
+		for (FPhysicsSimulationData& PhysicsSimulation : PhysicsSimulations)
 		{
-			FPhysicsSimulationData& TransformPhysicsSteps = PhysicsSimulations[i];
-			if (IsValid(TransformPhysicsSteps.Actor) && TransformPhysicsSteps.bIsAsleep == false)
+			if (IsValid(PhysicsSimulation.Actor) && PhysicsSimulation.bIsAsleep == false)
 			{
-				TransformPhysicsSteps.Steps.Add(TransformPhysicsSteps.Actor->GetActorTransform());
+				PhysicsSimulation.Steps.Emplace(PhysicsSimulation.Actor->GetActorTransform());
 			}
 		}
 
@@ -182,7 +181,7 @@ TArray<FPhysicsSimulationData> USimulationWorldComponent::PerformPhysicsSimulati
 	return PhysicsSimulations;
 }
 
-bool USimulationWorldComponent::DestroySimulationWorld()
+bool UPhysicsWorldSimulationManager::DestroySimulationWorld()
 {
 	if (IsValid(SimulationWorld))
 	{
@@ -198,17 +197,17 @@ bool USimulationWorldComponent::DestroySimulationWorld()
 	return IsValid(SimulationWorld) == false;
 }
 
-void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList) const
+void UPhysicsWorldSimulationManager::DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList) const
 {
 	if (IsValid(SimulationWorld) == false)
 	{
-		LOG_WARNING("SimulationWorld is nullptr.")
+		LOG_ERROR("SimulationWorld is nullptr.")
 		return;
 	}
 
 	if (IsValid(SourceActor) == false)
 	{
-		LOG_WARNING("SourceActor is nullptr.")
+		LOG_ERROR("SourceActor is nullptr.")
 		return;
 	}
 
@@ -222,11 +221,13 @@ void USimulationWorldComponent::DuplicateActor(AActor* SourceActor, TArray<AActo
 	DestinationList.Emplace(NewActor);
 }
 
-void USimulationWorldComponent::SetUpPhysicsSimulationFrame(FPhysicsSimulationParameters& PhysicsSimulationParameters) const
+void UPhysicsWorldSimulationManager::SetUpPhysicsSimulationFrame(FPhysicsSimulationParameters& PhysicsSimulationParameters) const
 {
 	if (PhysicsSimulationParameters.DeltaSeconds <= 0.0f)
 	{
-		PhysicsSimulationParameters.DeltaSeconds = 1.0f / 60.0f;
+		const FPhysicsSimulationParameters DefaultPhysicsSimulationParameters;
+		PhysicsSimulationParameters.DeltaSeconds = DefaultPhysicsSimulationParameters.DeltaSeconds;
+		LOG_WARNING("DeltaSeconds <= 0.0f. Fallback to default value ({0})", DefaultPhysicsSimulationParameters.DeltaSeconds);
 	}
 
 	SimulationWorld->GetPhysicsScene()->SetUpForFrame(

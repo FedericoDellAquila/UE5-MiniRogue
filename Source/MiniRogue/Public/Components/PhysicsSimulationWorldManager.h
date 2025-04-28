@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "SimulationWorldComponent.generated.h"
+#include "PhysicsSimulationWorldManager.generated.h"
 
 USTRUCT(BlueprintType)
 struct FPhysicsSimulationParameters
@@ -61,13 +60,12 @@ struct FPhysicsSimulationData
 };
 
 UCLASS(ClassGroup=(Custom))
-class MINIROGUE_API USimulationWorldComponent : public UActorComponent
+class MINIROGUE_API UPhysicsWorldSimulationManager : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
-	USimulationWorldComponent();
+	UPhysicsWorldSimulationManager();
 
 	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
 	bool CreateSimulationWorld();

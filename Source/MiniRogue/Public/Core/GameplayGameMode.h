@@ -3,7 +3,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameplayGameMode.generated.h"
 
-class USimulationWorldComponent;
+class UPhysicsWorldSimulationManager;
 
 UCLASS()
 class MINIROGUE_API AGameplayGameMode : public AGameModeBase
@@ -18,6 +18,9 @@ protected:
 	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 
 public:
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UPhysicsWorldSimulationManager> PhysicsWorldSimulationManager;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<AActor> DieClass;
 
@@ -27,9 +30,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	AActor* Die;
 
-	// UFUNCTION(BlueprintCallable)
-	// void SimulateRoll(TArray<FDiceAnimationPath>& OutAnimationPaths, int32 NumDice);
-
 	UFUNCTION(BlueprintCallable, BlueprintPure="true", Category="MiniRogueGameMode|Seed")
 	const FRandomStream& GetSeed() const { return Seed; }
 
@@ -37,12 +37,8 @@ public:
 	void SetSeed(FRandomStream NewSeed) { Seed = NewSeed; };
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent, Category="MiniRogueGameMode")
-	void OnInitGame(const FString& MapName, const FString& Options, const FString& ErrorMessage);
-
-private:
 	FRandomStream Seed;
 
-	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess))
-	TObjectPtr<USimulationWorldComponent> SimulationWorldComponent;
+	UFUNCTION(BlueprintImplementableEvent, Category="MiniRogueGameMode")
+	void OnInitGame(const FString& MapName, const FString& Options, const FString& ErrorMessage);
 };
