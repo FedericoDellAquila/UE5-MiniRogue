@@ -1,12 +1,20 @@
 ﻿#include "MiniRogueEditor.h"
-
 #include "LevelEditor.h"
 #include "MiniRogueEditorSettings.h"
+#include "HAL/FileManagerGeneric.h"
 #include "Utility/Logger.h"
 
 #define LOCTEXT_NAMESPACE "FMiniRogueEditorModule"
 
 void FMiniRogueEditorModule::StartupModule()
+{
+	SetupEditorTabs();
+}
+
+void FMiniRogueEditorModule::ShutdownModule()
+{}
+
+void FMiniRogueEditorModule::SetupEditorTabs()
 {
 	// Get Level Editor module
 	FLevelEditorModule& LevelEditorModule {FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor")};
@@ -26,9 +34,9 @@ void FMiniRogueEditorModule::StartupModule()
 				FText::FromString("Mini Rogue editor functionalities."), // Tooltip description
 				FNewMenuDelegate::CreateLambda([](FMenuBuilder& MenuBuilder) -> void
 				{
-					PackagingTools(MenuBuilder);
+					PackagingToolsSection(MenuBuilder);
 				}),
-				TEXT("AxonParkTab") // Optional tag name
+				TEXT("MiniRogueTab") // Optional tag name
 			);
 		})
 	);
@@ -37,12 +45,9 @@ void FMiniRogueEditorModule::StartupModule()
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
 }
 
-void FMiniRogueEditorModule::ShutdownModule()
-{}
-
-void FMiniRogueEditorModule::LaunchPackagedBuild(FMenuBuilder& MenuBuilder)
+void FMiniRogueEditorModule::LaunchPackagedBuildButton(FMenuBuilder& MenuBuilder)
 {
-	FString ExePath {
+	const FString ExePath {
 		FPaths::ConvertRelativePathToFull(
 			FPaths::SetExtension(
 				FPaths::Combine(
@@ -56,17 +61,18 @@ void FMiniRogueEditorModule::LaunchPackagedBuild(FMenuBuilder& MenuBuilder)
 	MenuBuilder.AddMenuEntry(
 		FText::FromString("Launch Packaged Build"),
 		FText::FromString(FString::Printf(TEXT("Launch the executable in %s."), *UMiniRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path)),
-		FSlateIcon {FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.PackageProject")},
+		FSlateIcon {FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Launch")},
 		FUIAction
 		{
 			FExecuteAction::CreateLambda([ExePath]() -> void
 			{
 				if (FPaths::FileExists(ExePath) == false)
 				{
-					LOG_WARNING("Executable not found at path: %s", *ExePath)
+					LOG_WARNING("Executable not found at path: {0}", *ExePath)
+					return;
 				}
 
-				UE_LOG(LogTemp, Log, TEXT("Launching executable: %s"), *ExePath);
+				LOG("Launching executable: {0}", ExePath);
 				FPlatformProcess::CreateProc(
 					*ExePath,
 					nullptr, // Optional command line arguments
@@ -80,17 +86,120 @@ void FMiniRogueEditorModule::LaunchPackagedBuild(FMenuBuilder& MenuBuilder)
 				);
 			})
 		},
-		TEXT("UpdateDevAuthenticationToken") // Optional tag name
+		TEXT("LaunchPackagedBuild") // Optional tag name
 	);
 }
 
-void FMiniRogueEditorModule::PackagingTools(FMenuBuilder& MenuBuilder)
+void FMiniRogueEditorModule::ClearPackagedFolder(const FString& PackagedProjectPath)
 {
-	MenuBuilder.BeginSection(NAME_None, LOCTEXT("Learning Framework", "Learning Framework"));
+	IFileManager& FileManager {FFileManagerGeneric::Get()};
+	FileManager.DeleteDirectory(*PackagedProjectPath, false, true);
+}
 
-	LaunchPackagedBuild(MenuBuilder);
+void FMiniRogueEditorModule::PackagedProject(const FString& Configuration, const FString& PackagedProjectPath, const FString& ExtraParameters)
+{
+	ClearPackagedFolder(PackagedProjectPath);
+
+	const FString RunUATPath {
+		FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::EngineDir(),
+			TEXT("Build/BatchFiles/RunUAT.bat")
+		))
+	};
+
+	const FString ProjectPath {FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())};
+
+	const FString UEExePath {
+		FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::EngineDir(),
+			TEXT("Binaries/Win64/UnrealEditor-Win64-DebugGame-Cmd.exe")
+		))
+	};
+
+	const FString Cmd {
+		FString::Printf(
+			TEXT("cmd.exe /c \"\"%s\" -ScriptsForProject=\"%s\" Turnkey -command=VerifySdk -platform=Win64 -UpdateIfNeeded -EditorIO -EditorIOPort=7973 ")
+			TEXT("-project=\"%s\" BuildCookRun -nop4 -utf8output -nocompileeditor -skipbuildeditor -cook ")
+			TEXT("-project=\"%s\" -target=MiniRogue -unrealexe=\"%s\" -platform=Win64 -installed -stage -archive -package -build -pak -iostore -compressed ")
+			TEXT("-prereqs -archivedirectory=\"%s\" -clientconfig=%s %s -nocompile -nocompileuat\""),
+			*RunUATPath,
+			*ProjectPath,
+			*ProjectPath,
+			*ProjectPath,
+			*UEExePath,
+			*PackagedProjectPath,
+			*Configuration,
+			*ExtraParameters
+		)
+	};
+
+	FPlatformProcess::CreateProc(
+		TEXT("cmd.exe"),
+		*FString::Printf(TEXT("/c %s"), *Cmd),
+		true,
+		false,
+		false,
+		nullptr,
+		0,
+		nullptr,
+		nullptr
+	);
+}
+
+void FMiniRogueEditorModule::PackagedProjectDebug(FMenuBuilder& MenuBuilder)
+{
+	const FString PackagedProjectPath {UMiniRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path};
+
+	MenuBuilder.AddMenuEntry(
+		FText::FromString("Debug"),
+		FText::FromString(FString::Printf(TEXT("Build the project in Debug configuration at path %s."), *PackagedProjectPath)),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Debug"),
+		FUIAction(FExecuteAction::CreateLambda([PackagedProjectPath]() -> void
+		{
+			PackagedProject(TEXT("Development"), PackagedProjectPath);
+		}))
+	);
+}
+
+void FMiniRogueEditorModule::PackagedProjectRelease(FMenuBuilder& MenuBuilder)
+{
+	const FString PackagedProjectPath {UMiniRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path};
+
+	MenuBuilder.AddMenuEntry(
+		FText::FromString("Release"),
+		FText::FromString(FString::Printf(TEXT("Build the project in Release configuration at path %s."), *PackagedProjectPath)),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "ClassIcon.PlayerController"),
+		FUIAction(FExecuteAction::CreateLambda([PackagedProjectPath]() -> void
+		{
+			PackagedProject(TEXT("Shipping"), PackagedProjectPath, TEXT("-nodebuginfo"));
+		}))
+	);
+}
+
+void FMiniRogueEditorModule::PackagingToolsSection(FMenuBuilder& MenuBuilder)
+{
+	MenuBuilder.BeginSection(NAME_None, LOCTEXT("Packaged Build Tools", "Packaged Build Tools"));
+
+	LaunchPackagedBuildButton(MenuBuilder);
+	PackageProjectButton(MenuBuilder);
 
 	MenuBuilder.EndSection();
+}
+
+void FMiniRogueEditorModule::PackageProjectButton(FMenuBuilder& MenuBuilder)
+{
+	// New: Add a SubMenu for Building
+	MenuBuilder.AddSubMenu(
+		FText::FromString("Package Project"),
+		FText::FromString("Package the project with a specific configuration."),
+		FNewMenuDelegate::CreateLambda([](FMenuBuilder& SubMenuBuilder) -> void
+		{
+			PackagedProjectDebug(SubMenuBuilder);
+			PackagedProjectRelease(SubMenuBuilder);
+		}),
+		false, // bInOpenSubMenuOnClick
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.PackageProject")
+	);
 }
 
 #undef LOCTEXT_NAMESPACE
