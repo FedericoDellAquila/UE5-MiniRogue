@@ -4,10 +4,10 @@ static const FName LogCategory {TEXT("MRLog")};
 
 // Network Role  
 #define NETWORK_ROLE (!IsValid(GetWorld()) ? TEXT("None")\
-: GetWorld()->GetNetMode() == ENetMode::NM_Standalone ? TEXT("Standalone")\
-: GetWorld()->GetNetMode() == ENetMode::NM_Client ? TEXT("Client")\
-: GetWorld()->GetNetMode() == ENetMode::NM_ListenServer ? TEXT("ListenServer")\
-: TEXT("DedicatedServer"))
+    : GetWorld()->GetNetMode() == ENetMode::NM_Standalone ? TEXT("Standalone")\
+    : GetWorld()->GetNetMode() == ENetMode::NM_Client ? TEXT("Client")\
+    : GetWorld()->GetNetMode() == ENetMode::NM_ListenServer ? TEXT("ListenServer")\
+    : TEXT("DedicatedServer"))
 
 // Network Role and ID  
 #define NETWORK_ID (FString::Printf(TEXT("%s %i"), NETWORK_ROLE, static_cast<int32>(GPlayInEditorID)))
@@ -202,50 +202,50 @@ static const FName LogCategory {TEXT("MRLog")};
 
 
 // Example: PRINT(10.0f, FColor::Orange, "Eat {0} {1}.", 5, TEXT("apples"))
-#define PRINT(DisplayTime, Color, Message, ...)     { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }
+#define PRINT(DisplayTime, bPrintConsole, Color, Message, ...)     { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }
 // Example: PRINT_MESSAGE(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_MESSAGE(DisplayTime, Message, ...)    { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }
+#define PRINT_MESSAGE(DisplayTime, bPrintConsole, Message, ...)    { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }
 // Example: PRINT_WARNING(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_WARNING(DisplayTime, Message, ...)    { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_WARNING(Message, __VA_ARGS__); }
+#define PRINT_WARNING(DisplayTime, bPrintConsole, Message, ...)    { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_WARNING(Message, __VA_ARGS__);} }
 // Example: PRINT_ERROR(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_ERROR(DisplayTime, Message, ...)      { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_ERROR(Message, __VA_ARGS__); }
+#define PRINT_ERROR(DisplayTime, bPrintConsole, Message, ...)      { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_ERROR(Message, __VA_ARGS__);} }
 // Example: PRINT_FATAL(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_FATAL(DisplayTime, Message, ...)      { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_FATAL(Message, __VA_ARGS__); }
+#define PRINT_FATAL(DisplayTime, bPrintConsole, Message, ...)      { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_FATAL(Message, __VA_ARGS__);} }
 
 
 // Example: CPRINT(IsValid(Actor), 10.0f, FColor::Orange, "Eat {0} {1}.", 5, TEXT("apples"))
-#define CPRINT(Condition, DisplayTime, Color, Message, ...)     { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }}
+#define CPRINT(Condition, DisplayTime, bPrintConsole, Color, Message, ...)     { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }}
 // Example: CPRINT_MESSAGE(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_MESSAGE(Condition, DisplayTime, Message, ...)    { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }}
+#define CPRINT_MESSAGE(Condition, DisplayTime, bPrintConsole, Message, ...)    { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }}
 // Example: CPRINT_WARNING(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_WARNING(Condition, DisplayTime, Message, ...)    { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_WARNING(Message, __VA_ARGS__); }}
+#define CPRINT_WARNING(Condition, DisplayTime, bPrintConsole, Message, ...)    { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_WARNING(Message, __VA_ARGS__);} }}
 // Example: CPRINT_ERROR(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_ERROR(Condition, DisplayTime, Message, ...)      { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_ERROR(Message, __VA_ARGS__); }}
+#define CPRINT_ERROR(Condition, DisplayTime, bPrintConsole, Message, ...)      { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_ERROR(Message, __VA_ARGS__);} }}
 // Example: CPRINT_FATAL(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_FATAL(Condition, DisplayTime, Message, ...)      { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_FATAL(Message, __VA_ARGS__); }}
+#define CPRINT_FATAL(Condition, DisplayTime, bPrintConsole, Message, ...)      { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(-1, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_FATAL(Message, __VA_ARGS__);} }}
 
 
 // Example: PRINT_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))
-#define PRINT_K(Key, DisplayTime, Color, Message, ...)      { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }
+#define PRINT_K(Key, DisplayTime, bPrintConsole, Color, Message, ...)      { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }
 // Example: PRINT_MESSAGE_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_MESSAGE_K(Key, DisplayTime, Message, ...)     { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }
+#define PRINT_MESSAGE_K(Key, DisplayTime, bPrintConsole, Message, ...)     { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }
 // Example: PRINT_WARNING_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_WARNING_K(Key, DisplayTime, Message, ...)     { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_WARNING(Message, __VA_ARGS__); }
+#define PRINT_WARNING_K(Key, DisplayTime, bPrintConsole, Message, ...)     { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_WARNING(Message, __VA_ARGS__);} }
 // Example: PRINT_ERROR_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_ERROR_K(Key, DisplayTime, Message, ...)       { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_ERROR(Message, __VA_ARGS__); }
+#define PRINT_ERROR_K(Key, DisplayTime, bPrintConsole, Message, ...)       { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_ERROR(Message, __VA_ARGS__);} }
 // Example: PRINT_FATAL_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_FATAL_K(Key, DisplayTime, Message, ...)       { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_FATAL(Message, __VA_ARGS__); }
+#define PRINT_FATAL_K(Key, DisplayTime, bPrintConsole, Message, ...)       { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_FATAL(Message, __VA_ARGS__);} }
 
 
 // Example: CPRINT_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))
-#define CPRINT_K(Condition, Key, DisplayTime, Color, Message, ...)      { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }}
+#define CPRINT_K(Condition, Key, DisplayTime, bPrintConsole, Color, Message, ...)      { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, Color, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }}
 // Example: CPRINT_MESSAGE_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_MESSAGE_K(Condition, Key, DisplayTime, Message, ...)     { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG(Message, __VA_ARGS__); }}
+#define CPRINT_MESSAGE_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)     { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Cyan, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG(Message, __VA_ARGS__);} }}
 // Example: CPRINT_WARNING_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_WARNING_K(Condition, Key, DisplayTime, Message, ...)     { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_WARNING(Message, __VA_ARGS__); }}
+#define CPRINT_WARNING_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)     { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Yellow, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_WARNING(Message, __VA_ARGS__);} }}
 // Example: CPRINT_ERROR_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_ERROR_K(Condition, Key, DisplayTime, Message, ...)       { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_ERROR(Message, __VA_ARGS__); }}
+#define CPRINT_ERROR_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)       { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_ERROR(Message, __VA_ARGS__);} }}
 // Example: CPRINT_FATAL_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_FATAL_K(Condition, Key, DisplayTime, Message, ...)       { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); LOG_FATAL(Message, __VA_ARGS__); }}
+#define CPRINT_FATAL_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)       { if (Condition) { if (GEngine) GEngine->AddOnScreenDebugMessage(Key, DisplayTime, FColor::Red, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__}), true); if (bPrintConsole) {LOG_FATAL(Message, __VA_ARGS__);} }}
 
 #endif

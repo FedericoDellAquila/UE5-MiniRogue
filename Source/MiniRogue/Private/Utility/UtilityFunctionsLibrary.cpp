@@ -1,6 +1,7 @@
 ﻿#include "Utility/UtilityFunctionsLibrary.h"
 #include "Log.h"
 #include "Core/GameplayGameMode.h"
+#include "Core/MiniRogueProjectSettings.h"
 #include "Utility/MiniRogueCheatManager.h"
 
 bool UUtilityFunctionsLibrary::GetGameplayGameMode(UObject* WorldContextObject, AGameplayGameMode*& OutGameMode)
@@ -31,57 +32,33 @@ float UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime()
 	float MaxFPSValue = MaxFPSEditorVar ? MaxFPSEditorVar->GetFloat() : -1.0f;
 
 	if (MaxFPSValue <= 0.0f)
-	{
-		LOG_WARNING("MaxFPSValue <= 0. Fallback to 120.");
 		MaxFPSValue = 120.0f;
-	}
 
 	return 1.0f / MaxFPSValue;
 }
 
-void UUtilityFunctionsLibrary::DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform,
-	UStaticMeshComponent* MeshComp, FLinearColor Color, float Duration, float Thickness)
+void UUtilityFunctionsLibrary::DrawActorTransformedBoundingBox(UObject* WorldContextObject, FTransform Transform, AActor* Actor, FLinearColor Color, float Duration, float Thickness)
 {
-	if (IsValid(MeshComp) == false || IsValid(MeshComp->GetStaticMesh()) == false)
-	{
+	if (IsValid(Actor) == false)
 		return;
-	}
 
-	const FBox LocalBox {MeshComp->GetStaticMesh()->GetBoundingBox()}; // Local-space AABB 
+	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
+	if (IsValid(World) == false)
+		return;
 
-	// Get 8 corners of the local bounding box
-	const FVector Min {LocalBox.Min};
-	const FVector Max {LocalBox.Max};
+	// Get the local bounding box (unscaled)
+	const FBox LocalBox {Actor->CalculateComponentsBoundingBoxInLocalSpace(false, true)};
+	const FVector LocalCenter {LocalBox.GetCenter()};
+	const FVector LocalExtent {LocalBox.GetExtent()};
 
-	TArray<FVector> LocalCorners
-	{
-		FVector(Min.X, Min.Y, Min.Z), // 0
-		FVector(Max.X, Min.Y, Min.Z), // 1
-		FVector(Max.X, Max.Y, Min.Z), // 2
-		FVector(Min.X, Max.Y, Min.Z), // 3
-		FVector(Min.X, Min.Y, Max.Z), // 4
-		FVector(Max.X, Min.Y, Max.Z), // 5
-		FVector(Max.X, Max.Y, Max.Z), // 6
-		FVector(Min.X, Max.Y, Max.Z) // 7
-	};
+	// Construct a box oriented by the provided Transform
+	const FVector TransformedCenter {Transform.TransformPosition(LocalCenter)};
+	const FQuat Rotation {Transform.GetRotation()};
+	const FVector Scale {Transform.GetScale3D()};
 
-	// Transform corners to world space
-	for (FVector& Corner : LocalCorners)
-	{
-		Corner = Transform.TransformPosition(Corner);
-	}
+	// Scale the extents correctly
+	const FVector ScaledExtent {LocalExtent * Scale};
 
-	// Define the 12 edges between the corners
-	constexpr int EdgeIndices[12][2] {
-		{0, 1}, {1, 2}, {2, 3}, {3, 0}, // Bottom square
-		{4, 5}, {5, 6}, {6, 7}, {7, 4}, // Top square
-		{0, 4}, {1, 5}, {2, 6}, {3, 7} // Vertical edges
-	};
-
-	// Draw the lines
-	const UWorld* TargetWorld {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
-	for (const auto& Edge : EdgeIndices)
-	{
-		DrawDebugLine(TargetWorld, LocalCorners[Edge[0]], LocalCorners[Edge[1]], Color.ToRGBE(), false, Duration, 0, Thickness);
-	}
+	// Draw the oriented bounding box
+	DrawDebugBox(World, TransformedCenter, ScaledExtent, Rotation, Color.ToRGBE(), false, Duration, 0, Thickness);
 }

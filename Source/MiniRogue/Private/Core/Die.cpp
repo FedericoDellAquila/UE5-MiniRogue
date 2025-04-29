@@ -165,7 +165,6 @@ void ADie::PhysicsSimulationStep(const float DeltaSeconds)
 
 	ElapsedTime += DeltaSeconds;
 	const float Alpha {FMath::Clamp(ElapsedTime / PhysicsSimulationData.DeltaTime, 0.0f, 1.0f)};
-
 	const FTransform& TargetTransform {PhysicsSimulationData.Steps[PhysicsSimulationIndex]};
 	const FTransform ResultTransform {UUtilityFunctionsLibrary::LerpTransform(StartingTransform, TargetTransform, Alpha)};
 
@@ -175,7 +174,7 @@ void ADie::PhysicsSimulationStep(const float DeltaSeconds)
 	{
 		StartingTransform = TargetTransform;
 		PhysicsSimulationIndex++;
-		ElapsedTime = 0.0f; // Reset for next interpolation
+		ElapsedTime = 0.0f;
 	}
 }
 

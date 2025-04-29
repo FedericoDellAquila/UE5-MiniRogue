@@ -1,6 +1,18 @@
 ﻿#include "Components/PhysicsSimulationWorldManager.h"
 #include "Physics/Experimental/PhysScene_Chaos.h"
 #include "Utility/Log.h"
+#include "Utility/UtilityFunctionsLibrary.h"
+
+FPhysicsSimulationParameters::FPhysicsSimulationParameters()
+	: Gravity(FVector(0.0f, 0.0f, -980.0f))
+	  , MinPhysicsDeltaTime(0)
+	  , MaxPhysicsDeltaTime(1.0f / 30.0f)
+	  , MaxSubsteps(6)
+	  , bSubstepping(false)
+{
+	DeltaSeconds = UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime();
+	MaxSubstepDeltaTime = DeltaSeconds;
+}
 
 UPhysicsWorldSimulationManager::UPhysicsWorldSimulationManager()
 {}
@@ -150,6 +162,9 @@ TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSim
 
 		for (FPhysicsSimulationData& TransformPhysicsSteps : PhysicsSimulations)
 		{
+			if (TransformPhysicsSteps.bIsAsleep)
+				continue;
+
 			int32 Count {TransformPhysicsSteps.MeshComponents.Num()};
 			for (UPrimitiveComponent* MeshComp : TransformPhysicsSteps.MeshComponents)
 			{
@@ -162,7 +177,10 @@ TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSim
 
 				Sleepers++;
 				if (Sleepers == PhysicsSimulations.Num())
+				{
 					bAllPhysicsActorsAtRest = true;
+					break;
+				}
 			}
 		}
 

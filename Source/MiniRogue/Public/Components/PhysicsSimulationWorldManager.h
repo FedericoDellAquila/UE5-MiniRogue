@@ -7,14 +7,7 @@ struct FPhysicsSimulationParameters
 {
 	GENERATED_BODY()
 
-	FPhysicsSimulationParameters()
-		: Gravity(FVector(0.0f, 0.0f, -980.0f))
-		  , DeltaSeconds(1.0f / 120.0f)
-		  , MinPhysicsDeltaTime(0)
-		  , MaxPhysicsDeltaTime(1.0f / 30.0f)
-		  , MaxSubstepDeltaTime(1.0f / 120.0f)
-		  , MaxSubsteps(6)
-		  , bSubstepping(false) {}
+	FPhysicsSimulationParameters();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Gravity;

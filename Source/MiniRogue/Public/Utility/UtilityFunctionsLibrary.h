@@ -25,6 +25,5 @@ public:
 	static float GetDefaultPhysicsStepDeltaTime();
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
-	static void DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform, UStaticMeshComponent* MeshComp,
-		FLinearColor Color = FLinearColor::Blue, float Duration = 5.0f, float Thickness = 0.2f);
+	static void DrawActorTransformedBoundingBox(UObject* WorldContextObject, FTransform Transform, AActor* Actor, FLinearColor Color = FLinearColor::Blue, float Duration = 5.0f, float Thickness = 0.2f);
 };
