@@ -1,6 +1,5 @@
 ﻿#include "Core/Die.h"
 #include "Core/DieFace.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Utility/Log.h"
 #include "Utility/UtilityFunctionsLibrary.h"
 
@@ -24,14 +23,14 @@ ADie::ADie()
 		SetRootComponent(MeshComponent);
 		MeshComponent->SetSimulatePhysics(true);
 
-		const ConstructorHelpers::FObjectFinder<UStaticMesh> StaticMeshAsset {TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'")};
-		if (StaticMeshAsset.Succeeded())
+		if (const ConstructorHelpers::FObjectFinder<UStaticMesh> StaticMeshAsset {TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'")}; StaticMeshAsset.Succeeded())
 		{
 			MeshComponent->SetStaticMesh(StaticMeshAsset.Object);
 		}
 
-		const ConstructorHelpers::FObjectFinder<UMaterial> MaterialAsset {TEXT("Material'/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial'")};
-		if (MaterialAsset.Succeeded())
+		if (const ConstructorHelpers::FObjectFinder<UMaterial> MaterialAsset {
+			TEXT("Material'/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial'")
+		}; MaterialAsset.Succeeded())
 		{
 			MeshComponent->SetMaterial(0, MaterialAsset.Object);
 		}

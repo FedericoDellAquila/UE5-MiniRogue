@@ -8,9 +8,7 @@ UPhysicsWorldSimulationManager::UPhysicsWorldSimulationManager()
 bool UPhysicsWorldSimulationManager::CreateSimulationWorld()
 {
 	if (IsValid(SimulationWorld))
-	{
 		return true;
-	}
 
 	// Create a brand new world with a unique name and transient package
 	const FName UniqueWorldName {MakeUniqueObjectName(this, UWorld::StaticClass(), TEXT("SimulationWorld"))};
@@ -44,58 +42,70 @@ bool UPhysicsWorldSimulationManager::CreateSimulationWorld()
 	return IsValid(SimulationWorld);
 }
 
-void UPhysicsWorldSimulationManager::CopyStaticActors(TArray<AActor*> InStaticActors)
+TArray<AActor*> UPhysicsWorldSimulationManager::CopyStaticActors(TArray<AActor*> InStaticActors)
 {
 	if (InStaticActors.Num() == 0)
-	{
-		return;
-	}
+		return {};
 
+	TArray<AActor*> Clones;
+	Clones.Reserve(InStaticActors.Num());
 	for (AActor* Actor : InStaticActors)
 	{
-		DuplicateActor(Actor, StaticActors);
+		DuplicateActor(Actor, Clones, GET_FUNCTION_NAME_CHECKED(UPhysicsWorldSimulationManager, OnStaticActorDestroyed));
 	}
+
+	StaticActors.Append(Clones);
+
+	return Clones;
 }
 
-void UPhysicsWorldSimulationManager::CopyPhysicsActors(TArray<AActor*> InPhysicsActors)
+TArray<AActor*> UPhysicsWorldSimulationManager::CopyPhysicsActors(TArray<AActor*> InPhysicsActors)
 {
 	if (InPhysicsActors.Num() == 0)
-	{
-		return;
-	}
+		return {};
 
+	TArray<AActor*> Clones;
+	Clones.Reserve(InPhysicsActors.Num());
 	for (AActor* Actor : InPhysicsActors)
 	{
-		DuplicateActor(Actor, PhysicsActors);
+		DuplicateActor(Actor, Clones, GET_FUNCTION_NAME_CHECKED(UPhysicsWorldSimulationManager, OnPhysicsActorDestroyed));
 	}
+
+	PhysicsActors.Append(Clones);
+
+	return Clones;
 }
 
-void UPhysicsWorldSimulationManager::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms)
+TArray<AActor*> UPhysicsWorldSimulationManager::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms)
 {
 	if (IsValid(SimulationWorld) == false)
 	{
 		LOG_ERROR("SimulationWorld is nullptr.")
-		return;
+		return {};
 	}
 
 	if (ActorClass.IsNull())
 	{
 		LOG_ERROR("ActorClass is nullptr.")
-		return;
+		return {};
 	}
 
+	TArray<AActor*> SpawnedActors;
 	for (const FTransform& Transform : Transforms)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		AActor* NewActor {SimulationWorld->SpawnActor<AActor>(ActorClass.LoadSynchronous(), Transform, SpawnParams)};
-		PhysicsActors.Emplace(NewActor);
+		NewActor->OnDestroyed.AddUniqueDynamic(this, &ThisClass::OnPhysicsActorDestroyed);
+		SpawnedActors.Emplace(NewActor);
 	}
+
+	PhysicsActors.Append(SpawnedActors);
+	return SpawnedActors;
 }
 
-TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters,
-	int32 MaxSteps/*= 300*/, bool bAutoDestroySimulationWorld/*= true*/)
+TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps/*= 500*/, bool bAutoDestroySimulationWorld/*= true*/)
 {
 	if (IsValid(SimulationWorld) == false || SimulationWorld->GetPhysicsScene() == nullptr)
 	{
@@ -144,9 +154,7 @@ TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSim
 			for (UPrimitiveComponent* MeshComp : TransformPhysicsSteps.MeshComponents)
 			{
 				if (MeshComp->IsAnyRigidBodyAwake() == false)
-				{
 					Count--;
-				}
 			}
 			if (Count == 0)
 			{
@@ -154,9 +162,7 @@ TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSim
 
 				Sleepers++;
 				if (Sleepers == PhysicsSimulations.Num())
-				{
 					bAllPhysicsActorsAtRest = true;
-				}
 			}
 		}
 
@@ -164,9 +170,7 @@ TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSim
 		for (FPhysicsSimulationData& PhysicsSimulation : PhysicsSimulations)
 		{
 			if (IsValid(PhysicsSimulation.Actor) && PhysicsSimulation.bIsAsleep == false)
-			{
 				PhysicsSimulation.Steps.Emplace(PhysicsSimulation.Actor->GetActorTransform());
-			}
 		}
 
 		PhysicsScene->EndFrame();
@@ -176,9 +180,7 @@ TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSim
 	SimulationWorld->FinishPhysicsSim();
 
 	if (bAutoDestroySimulationWorld)
-	{
 		DestroySimulationWorld();
-	}
 
 	return PhysicsSimulations;
 }
@@ -199,7 +201,7 @@ bool UPhysicsWorldSimulationManager::DestroySimulationWorld()
 	return IsValid(SimulationWorld) == false;
 }
 
-void UPhysicsWorldSimulationManager::DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList) const
+void UPhysicsWorldSimulationManager::DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList, const FName& FunctionName/*= NAME_None*/)
 {
 	if (IsValid(SimulationWorld) == false)
 	{
@@ -220,6 +222,19 @@ void UPhysicsWorldSimulationManager::DuplicateActor(AActor* SourceActor, TArray<
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	AActor* NewActor {SimulationWorld->SpawnActor<AActor>(SourceActorClass, SpawnParams)};
+	if (IsValid(NewActor) == false)
+	{
+		LOG_ERROR("Failed to duplicate {0}", SourceActor->GetName());
+		return;
+	}
+
+	if (FunctionName.IsNone() == false)
+	{
+		FScriptDelegate ScriptDelegate;
+		ScriptDelegate.BindUFunction(this, FunctionName);
+		NewActor->OnDestroyed.AddUnique(ScriptDelegate);
+	}
+
 	DestinationList.Emplace(NewActor);
 }
 
@@ -240,4 +255,14 @@ void UPhysicsWorldSimulationManager::SetUpPhysicsSimulationFrame(FPhysicsSimulat
 		PhysicsSimulationParameters.MaxSubstepDeltaTime,
 		PhysicsSimulationParameters.MaxSubsteps,
 		PhysicsSimulationParameters.bSubstepping);
+}
+
+void UPhysicsWorldSimulationManager::OnStaticActorDestroyed(AActor* StaticActor)
+{
+	StaticActors.Remove(StaticActor);
+}
+
+void UPhysicsWorldSimulationManager::OnPhysicsActorDestroyed(AActor* PhysicsActor)
+{
+	PhysicsActors.Remove(PhysicsActor);
 }

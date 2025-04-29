@@ -73,14 +73,14 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
 	bool CreateSimulationWorld();
 
-	UFUNCTION(BlueprintCallable)
-	void CopyStaticActors(TArray<AActor*> InStaticActors);
+	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Static Actors Clones"))
+	TArray<AActor*> CopyStaticActors(TArray<AActor*> InStaticActors);
 
 	UFUNCTION(BlueprintCallable)
-	void CopyPhysicsActors(TArray<AActor*> InPhysicsActors);
+	TArray<AActor*> CopyPhysicsActors(TArray<AActor*> InPhysicsActors);
 
-	UFUNCTION(BlueprintCallable)
-	void SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms);
+	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Spawned Physics Actors"))
+	TArray<AActor*> SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure="true")
 	UWorld* GetSimulationWorld() const { return SimulationWorld; }
@@ -92,8 +92,7 @@ public:
 	TArray<AActor*> GetPhysicsActors() const { return PhysicsActors; }
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FPhysicsSimulationData> PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps = 500,
-	                                                        bool bAutoDestroySimulationWorld = true);
+	TArray<FPhysicsSimulationData> PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps = 500, bool bAutoDestroySimulationWorld = true);
 
 	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
 	bool DestroySimulationWorld();
@@ -108,7 +107,13 @@ private:
 	UPROPERTY()
 	TArray<AActor*> PhysicsActors;
 
-	void DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList) const;
+	void DuplicateActor(AActor* SourceActor, TArray<AActor*>& DestinationList, const FName& FunctionName = NAME_None);
 
 	void SetUpPhysicsSimulationFrame(FPhysicsSimulationParameters& PhysicsSimulationParameters) const;
+
+	UFUNCTION()
+	void OnStaticActorDestroyed(AActor* StaticActor);
+
+	UFUNCTION()
+	void OnPhysicsActorDestroyed(AActor* PhysicsActor);
 };

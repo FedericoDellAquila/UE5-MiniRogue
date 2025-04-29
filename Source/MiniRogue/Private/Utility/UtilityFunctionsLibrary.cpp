@@ -1,5 +1,4 @@
 ﻿#include "Utility/UtilityFunctionsLibrary.h"
-
 #include "Log.h"
 #include "Core/GameplayGameMode.h"
 #include "Utility/MiniRogueCheatManager.h"
