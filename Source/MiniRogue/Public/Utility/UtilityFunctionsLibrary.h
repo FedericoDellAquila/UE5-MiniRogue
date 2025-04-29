@@ -18,9 +18,13 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
 	static bool GetCheatManager(UObject* WorldContextObject, UMiniRogueCheatManager*& OutCheatManager);
 
+	UFUNCTION(BlueprintCallable)
+	static FTransform LerpTransform(FTransform Start, FTransform End, float Alpha);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure="true")
 	static float GetDefaultPhysicsStepDeltaTime();
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
-	static void DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform, UStaticMeshComponent* MeshComp, FLinearColor Color = FLinearColor::Blue, float Duration = 5.0f, float Thickness = 0.2f);
+	static void DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform, UStaticMeshComponent* MeshComp,
+		FLinearColor Color = FLinearColor::Blue, float Duration = 5.0f, float Thickness = 0.2f);
 };

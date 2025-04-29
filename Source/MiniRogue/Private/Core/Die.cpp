@@ -1,6 +1,8 @@
 ﻿#include "Core/Die.h"
 #include "Core/DieFace.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Utility/Log.h"
+#include "Utility/UtilityFunctionsLibrary.h"
 
 ADie::ADie()
 {
@@ -37,9 +39,7 @@ ADie::ADie()
 
 	FacesRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("FacesRootComponent"));
 	if (IsValid(FacesRootComponent))
-	{
 		FacesRootComponent->SetupAttachment(MeshComponent);
-	}
 }
 
 void ADie::OnConstruction(const FTransform& Transform)
@@ -75,6 +75,14 @@ void ADie::BeginPlay()
 	DieFaces = FindFaces();
 }
 
+void ADie::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (bIsReplicatingPhysicsSimulation)
+		PhysicsSimulationStep(DeltaSeconds);
+}
+
 int32 ADie::GetValue() const
 {
 	int32 BestValue {0};
@@ -88,25 +96,20 @@ int32 ADie::GetValue() const
 			BestValue = Face->GetValue();
 
 			if (FMath::IsNearlyEqual(DotProduct, 1.0f))
-			{
 				break;
-			}
 		}
 	}
 
 	if (BestValue <= 0)
-	{
 		LOG_ERROR("Failed to determine the value of the die.")
-	}
+
 	return BestValue;
 }
 
 void ADie::RotateFromFaceToFace(int32 FromValue, int32 ToValue) const
 {
 	if (FromValue == ToValue)
-	{
 		return;
-	}
 
 	const FVector* FromNormalPtr {FacesNormals.Find(FromValue)};
 	const FVector* ToNormalPtr {FacesNormals.Find(ToValue)};
@@ -147,12 +150,34 @@ TArray<UDieFace*> ADie::FindFaces() const
 	for (USceneComponent* ChildComponent : ChildrenComponents)
 	{
 		if (UDieFace* DieFace {Cast<UDieFace>(ChildComponent)}; IsValid(DieFace))
-		{
 			FoundDieFaces.Emplace(DieFace);
-		}
 	}
 
 	return FoundDieFaces;
+}
+
+void ADie::PhysicsSimulationStep(const float DeltaSeconds)
+{
+	if (PhysicsSimulationData.Steps.IsValidIndex(PhysicsSimulationIndex) == false)
+	{
+		bIsReplicatingPhysicsSimulation = false;
+		return;
+	}
+
+	ElapsedTime += DeltaSeconds;
+	const float Alpha {FMath::Clamp(ElapsedTime / PhysicsSimulationData.DeltaTime, 0.0f, 1.0f)};
+
+	const FTransform& TargetTransform {PhysicsSimulationData.Steps[PhysicsSimulationIndex]};
+	const FTransform ResultTransform {UUtilityFunctionsLibrary::LerpTransform(StartingTransform, TargetTransform, Alpha)};
+
+	SetActorTransform(ResultTransform);
+
+	if (Alpha >= 1.0f)
+	{
+		StartingTransform = TargetTransform;
+		PhysicsSimulationIndex++;
+		ElapsedTime = 0.0f; // Reset for next interpolation
+	}
 }
 
 UDieFace* ADie::GetFaceByValue(int32 Value) const
@@ -164,18 +189,27 @@ UDieFace* ADie::GetFaceByValue(int32 Value) const
 	{
 		UDieFace* DieFace {Cast<UDieFace>(SceneComponent)};
 		if (IsValid(DieFace) == false)
-		{
 			continue;
-		}
 
 		const int32 FaceValue {DieFace->GetValue()};
 		if (FaceValue != Value)
-		{
 			continue;
-		}
 
 		return DieFace;
 	}
 
 	return nullptr;
+}
+
+void ADie::ReproducePhysicsSimulation(const FPhysicsSimulationData& InPhysicsSimulationData)
+{
+	MeshComponent->SetSimulatePhysics(false);
+
+	PhysicsSimulationData = InPhysicsSimulationData;
+	PhysicsSimulationIndex = 1;
+
+	SetActorTransform(PhysicsSimulationData.Steps[0]);
+	StartingTransform = GetActorTransform();
+
+	bIsReplicatingPhysicsSimulation = true;
 }

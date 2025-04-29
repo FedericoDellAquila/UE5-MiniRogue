@@ -9,12 +9,12 @@ struct FPhysicsSimulationParameters
 
 	FPhysicsSimulationParameters()
 		: Gravity(FVector(0.0f, 0.0f, -980.0f))
-		, DeltaSeconds(1.0f / 60.0f)
-		, MinPhysicsDeltaTime(0)
-		, MaxPhysicsDeltaTime(1.0f / 30.0f)
-		, MaxSubstepDeltaTime(1.0f / 60.0f)
-		, MaxSubsteps(6)
-		, bSubstepping(false) {}
+		  , DeltaSeconds(1.0f / 120.0f)
+		  , MinPhysicsDeltaTime(0)
+		  , MaxPhysicsDeltaTime(1.0f / 30.0f)
+		  , MaxSubstepDeltaTime(1.0f / 120.0f)
+		  , MaxSubsteps(6)
+		  , bSubstepping(false) {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Gravity;
@@ -48,6 +48,9 @@ struct FPhysicsSimulationData
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Id;
+
+	UPROPERTY(BlueprintReadOnly)
+	float DeltaTime;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FTransform> Steps;
@@ -89,7 +92,8 @@ public:
 	TArray<AActor*> GetPhysicsActors() const { return PhysicsActors; }
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FPhysicsSimulationData> PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps = 500, bool bAutoDestroySimulationWorld = true);
+	TArray<FPhysicsSimulationData> PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps = 500,
+	                                                        bool bAutoDestroySimulationWorld = true);
 
 	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Success"))
 	bool DestroySimulationWorld();

@@ -2,11 +2,13 @@
 
 #pragma once
 #include "CoreMinimal.h"
+#include "Components/PhysicsSimulationWorldManager.h"
 #include "GameFramework/Actor.h"
 #include "Die.generated.h"
 
 class UDieFace;
-// class UTextRenderComponent;
+
+// TODO: implement a Delegate to notify the system for when the physics replication is finished
 
 UCLASS()
 class MINIROGUE_API ADie : public AActor
@@ -16,6 +18,7 @@ class MINIROGUE_API ADie : public AActor
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 public:
 	ADie();
@@ -35,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UDieFace* GetFaceByValue(int32 Value) const;
 
+	UFUNCTION(BlueprintCallable)
+	void ReproducePhysicsSimulation(const FPhysicsSimulationData& InPhysicsSimulationData);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> MeshComponent;
@@ -47,4 +53,12 @@ private:
 	TArray<UDieFace*> DieFaces;
 
 	TArray<UDieFace*> FindFaces() const;
+
+	bool bIsReplicatingPhysicsSimulation;
+	float ElapsedTime;
+	FTransform StartingTransform;
+	int32 PhysicsSimulationIndex;
+	FPhysicsSimulationData PhysicsSimulationData;
+
+	void PhysicsSimulationStep(const float DeltaSeconds);
 };

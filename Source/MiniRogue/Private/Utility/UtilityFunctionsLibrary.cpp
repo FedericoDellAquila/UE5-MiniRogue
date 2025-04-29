@@ -1,4 +1,6 @@
 ﻿#include "Utility/UtilityFunctionsLibrary.h"
+
+#include "Log.h"
 #include "Core/GameplayGameMode.h"
 #include "Utility/MiniRogueCheatManager.h"
 
@@ -14,19 +16,39 @@ bool UUtilityFunctionsLibrary::GetCheatManager(UObject* WorldContextObject, UMin
 	return IsValid(OutCheatManager);
 }
 
-float UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime()
+FTransform UUtilityFunctionsLibrary::LerpTransform(FTransform Start, FTransform End, float Alpha)
 {
-	return 1.0f / 60.0f;
+	const FVector NewLocation {FMath::Lerp(Start.GetLocation(), End.GetLocation(), Alpha)};
+	const FQuat NewRotation {FQuat::Slerp(Start.GetRotation(), End.GetRotation(), Alpha)};
+	const FVector NewScale {FMath::Lerp(Start.GetScale3D(), End.GetScale3D(), Alpha)};
+
+	const FTransform ResultTransform(NewRotation, NewLocation, NewScale);
+	return ResultTransform;
 }
 
-void UUtilityFunctionsLibrary::DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform, UStaticMeshComponent* MeshComp, FLinearColor Color, float Duration, float Thickness)
+float UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime()
+{
+	const IConsoleVariable* MaxFPSEditorVar {IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"))};
+	float MaxFPSValue = MaxFPSEditorVar ? MaxFPSEditorVar->GetFloat() : -1.0f;
+
+	if (MaxFPSValue <= 0.0f)
+	{
+		LOG_WARNING("MaxFPSValue <= 0. Fallback to 120.");
+		MaxFPSValue = 120.0f;
+	}
+
+	return 1.0f / MaxFPSValue;
+}
+
+void UUtilityFunctionsLibrary::DrawOrientedBoundingBoxFromStaticMeshComponent(UObject* WorldContextObject, FTransform Transform,
+	UStaticMeshComponent* MeshComp, FLinearColor Color, float Duration, float Thickness)
 {
 	if (IsValid(MeshComp) == false || IsValid(MeshComp->GetStaticMesh()) == false)
 	{
 		return;
 	}
 
-	const FBox LocalBox {MeshComp->GetStaticMesh()->GetBoundingBox()}; // Local-space AABB
+	const FBox LocalBox {MeshComp->GetStaticMesh()->GetBoundingBox()}; // Local-space AABB 
 
 	// Get 8 corners of the local bounding box
 	const FVector Min {LocalBox.Min};

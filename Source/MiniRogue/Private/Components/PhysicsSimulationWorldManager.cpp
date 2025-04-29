@@ -94,7 +94,8 @@ void UPhysicsWorldSimulationManager::SpawnPhysicsActors(TSoftClassPtr<AActor> Ac
 	}
 }
 
-TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps/*= 300*/, bool bAutoDestroySimulationWorld/*= true*/)
+TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters,
+	int32 MaxSteps/*= 300*/, bool bAutoDestroySimulationWorld/*= true*/)
 {
 	if (IsValid(SimulationWorld) == false || SimulationWorld->GetPhysicsScene() == nullptr)
 	{
@@ -118,6 +119,7 @@ TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSim
 		PhysicsSimulation.Actor = Actor;
 		PhysicsSimulation.bIsAsleep = false;
 		PhysicsSimulation.Id = i;
+		PhysicsSimulation.DeltaTime = PhysicsSimulationParameters.DeltaSeconds;
 		Actor->GetComponents(UMeshComponent::StaticClass(), PhysicsSimulation.MeshComponents, true);
 		PhysicsSimulations.Emplace(PhysicsSimulation);
 	}
