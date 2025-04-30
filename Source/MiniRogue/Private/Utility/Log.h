@@ -133,51 +133,51 @@ static const FName LogCategory {TEXT("MRLog")};
 
 
 // Example: PRINT(10.0f, FColor::Orange, "Eat {0} {1}.", 5, TEXT("apples"))
-#define PRINT(DisplayTime, Message, Color, ...)     {}
+#define PRINT(DisplayTime, bPrintConsole, Color, Message, ...)     {}
 // Example: PRINT_MESSAGE(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_MESSAGE(DisplayTime, Message, ...)    {}
+#define PRINT_MESSAGE(DisplayTime, bPrintConsole, Message, ...)    {}
 // Example: PRINT_WARNING(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_WARNING(DisplayTime, Message, ...)    {}
+#define PRINT_WARNING(DisplayTime, bPrintConsole, Message, ...)    {}
 // Example: PRINT_ERROR(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_ERROR(DisplayTime, Message, ...)      {}
+#define PRINT_ERROR(DisplayTime, bPrintConsole, Message, ...)      {}
 // Example: PRINT_FATAL(10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_FATAL(DisplayTime, Message, ...)      {}
+#define PRINT_FATAL(DisplayTime, bPrintConsole, Message, ...)      {}
 
 
 // Example: CPRINT(IsValid(Actor), 10.0f, FColor::Orange, "Eat {0} {1}.", 5, TEXT("apples"))
-#define CPRINT(Condition, DisplayTime, Color, Message, ...)     {}
+#define CPRINT(Condition, DisplayTime, bPrintConsole, Color, Message, ...)     {}
 // Example: CPRINT_MESSAGE(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_MESSAGE(Condition, DisplayTime, Message, ...)    {}
+#define CPRINT_MESSAGE(Condition, DisplayTime, bPrintConsole, Message, ...)    {}
 // Example: CPRINT_WARNING(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_WARNING(Condition, DisplayTime, Message, ...)    {}
+#define CPRINT_WARNING(Condition, DisplayTime, bPrintConsole, Message, ...)    {}
 // Example: CPRINT_ERROR(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_ERROR(Condition, DisplayTime, Message, ...)      {}
+#define CPRINT_ERROR(Condition, DisplayTime, bPrintConsole, Message, ...)      {}
 // Example: CPRINT_FATAL(IsValid(Actor), 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_FATAL(Condition, DisplayTime, Message, ...)      {}
+#define CPRINT_FATAL(Condition, DisplayTime, bPrintConsole, Message, ...)      {}
   
 
 // Example: PRINT_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))
-#define PRINT_K(Key, DisplayTime, Color, Message, ...)      {}
+#define PRINT_K(Key, DisplayTime, bPrintConsole, Color, Message, ...)      {}
 // Example: PRINT_MESSAGE_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_MESSAGE_K(Key, DisplayTime, Message, ...)     {}
+#define PRINT_MESSAGE_K(Key, DisplayTime, bPrintConsole, Message, ...)     {}
 // Example: PRINT_WARNING_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_WARNING_K(Key, DisplayTime, Message, ...)     {}
+#define PRINT_WARNING_K(Key, DisplayTime, bPrintConsole, Message, ...)     {}
 // Example: PRINT_ERROR_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_ERROR_K(Key, DisplayTime, Message, ...)       {}
+#define PRINT_ERROR_K(Key, DisplayTime, bPrintConsole, Message, ...)       {}
 // Example: PRINT_FATAL_K(4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define PRINT_FATAL_K(Key, DisplayTime, Message, ...)       {}
+#define PRINT_FATAL_K(Key, DisplayTime, bPrintConsole, Message, ...)       {}
 
 
 // Example: CPRINT_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))
-#define CPRINT_K(Condition, Key, DisplayTime, Color, Message, ...)      {}
+#define CPRINT_K(Condition, Key, DisplayTime, bPrintConsole, Color, Message, ...)      {}
 // Example: CPRINT_MESSAGE_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_MESSAGE_K(Condition, Key, DisplayTime, Message, ...)     {}
+#define CPRINT_MESSAGE_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)     {}
 // Example: CPRINT_WARNING_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_WARNING_K(Condition, Key, DisplayTime, Message, ...)     {}
+#define CPRINT_WARNING_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)     {}
 // Example: CPRINT_ERROR_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_ERROR_K(Condition, Key, DisplayTime, Message, ...)       {}
+#define CPRINT_ERROR_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)       {}
 // Example: CPRINT_FATAL_K(IsValid(Actor), 4, 10.0f, "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CPRINT_FATAL_K(Condition, Key, DisplayTime, Message, ...)       {}
+#define CPRINT_FATAL_K(Condition, Key, DisplayTime, bPrintConsole, Message, ...)       {}
     
 #else
 
