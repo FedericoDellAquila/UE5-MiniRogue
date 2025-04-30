@@ -1,4 +1,4 @@
-﻿#include "Components/PhysicsSimulationWorldManager.h"
+﻿#include "Core/PhysicsSimulationWorldManager.h"
 #include "Physics/Experimental/PhysScene_Chaos.h"
 #include "Utility/Log.h"
 #include "Utility/UtilityFunctionsLibrary.h"
@@ -54,6 +54,8 @@ bool UPhysicsWorldSimulationManager::CreateSimulationWorld()
 	return IsValid(SimulationWorld);
 }
 
+// TODO: improve CopyStaticActors and CopyPhysicsActors. There's some repeating code that can be avoided
+
 TArray<AActor*> UPhysicsWorldSimulationManager::CopyStaticActors(TArray<AActor*> InStaticActors)
 {
 	if (InStaticActors.Num() == 0)
@@ -62,9 +64,7 @@ TArray<AActor*> UPhysicsWorldSimulationManager::CopyStaticActors(TArray<AActor*>
 	TArray<AActor*> Clones;
 	Clones.Reserve(InStaticActors.Num());
 	for (AActor* Actor : InStaticActors)
-	{
 		DuplicateActor(Actor, Clones, GET_FUNCTION_NAME_CHECKED(UPhysicsWorldSimulationManager, OnStaticActorDestroyed));
-	}
 
 	StaticActors.Append(Clones);
 
@@ -79,9 +79,7 @@ TArray<AActor*> UPhysicsWorldSimulationManager::CopyPhysicsActors(TArray<AActor*
 	TArray<AActor*> Clones;
 	Clones.Reserve(InPhysicsActors.Num());
 	for (AActor* Actor : InPhysicsActors)
-	{
 		DuplicateActor(Actor, Clones, GET_FUNCTION_NAME_CHECKED(UPhysicsWorldSimulationManager, OnPhysicsActorDestroyed));
-	}
 
 	PhysicsActors.Append(Clones);
 

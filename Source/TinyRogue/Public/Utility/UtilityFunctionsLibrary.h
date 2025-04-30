@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static FTransform LerpTransform(FTransform Start, FTransform End, float Alpha);
 
+	UFUNCTION(BlueprintCallable)
+	static void SetMaxFps(float Value);
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure="true")
 	static float GetDefaultPhysicsStepDeltaTime();
 

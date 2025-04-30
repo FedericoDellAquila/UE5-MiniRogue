@@ -26,6 +26,12 @@ FTransform UUtilityFunctionsLibrary::LerpTransform(FTransform Start, FTransform 
 	return ResultTransform;
 }
 
+void UUtilityFunctionsLibrary::SetMaxFps(float Value)
+{
+	IConsoleVariable* MaxFPSEditorVar {IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"))};
+	MaxFPSEditorVar->Set(Value, ECVF_SetByConsole);
+}
+
 float UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime()
 {
 	const IConsoleVariable* MaxFPSEditorVar {IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"))};

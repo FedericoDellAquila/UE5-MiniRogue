@@ -14,7 +14,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Get Tiny Rogue Editor Settings")
 	static const UTinyRogueEditorSettings* Get();
 
-	UPROPERTY(Config, BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(Config, BlueprintReadOnly, EditDefaultsOnly, meta=(RelativePath))
 	FDirectoryPath PackagedBuildDirectoryPath;
 
 	UPROPERTY(Config, EditDefaultsOnly)

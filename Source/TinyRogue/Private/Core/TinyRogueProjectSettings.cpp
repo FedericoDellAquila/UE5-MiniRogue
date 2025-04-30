@@ -1,6 +1,9 @@
 ﻿#include "Core/TinyRogueProjectSettings.h"
 
-UTinyRogueProjectSettings::UTinyRogueProjectSettings() {}
+UTinyRogueProjectSettings::UTinyRogueProjectSettings()
+{
+	CategoryName = TEXT("TinyRogue");
+}
 
 const UTinyRogueProjectSettings* UTinyRogueProjectSettings::Get()
 {

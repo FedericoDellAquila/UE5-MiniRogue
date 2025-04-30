@@ -1,5 +1,5 @@
 ﻿#include "TinyRogue/Public/Core/TinyRogueGameMode.h"
-#include "Components/PhysicsSimulationWorldManager.h"
+#include "Core/PhysicsSimulationWorldManager.h"
 
 ATinyRogueGameMode::ATinyRogueGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -11,9 +11,7 @@ void ATinyRogueGameMode::InitGame(const FString& MapName, const FString& Options
 	Super::InitGame(MapName, Options, ErrorMessage);
 
 	if (IsValid(PhysicsWorldSimulationManager) == false)
-	{
 		PhysicsWorldSimulationManager = NewObject<UPhysicsWorldSimulationManager>(this);
-	}
 
 	OnInitGame(MapName, Options, ErrorMessage);
 }

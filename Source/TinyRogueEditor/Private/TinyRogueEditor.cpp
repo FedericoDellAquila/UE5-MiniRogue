@@ -49,13 +49,13 @@ void FTinyRogueEditorModule::LaunchPackagedBuildButton(FMenuBuilder& MenuBuilder
 				FPaths::Combine(
 					UTinyRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path,
 					TEXT("Windows"),
-					TEXT("TinyRogue")),
+					FApp::GetProjectName()),
 				TEXT("exe")))
 	};
 
 	MenuBuilder.AddMenuEntry(
 		FText::FromString(TEXT("Launch Packaged Build")),
-		FText::FromString(FString::Printf(TEXT("Launch the executable in %s."), *UTinyRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path)),
+		FText::FromString(FString::Printf(TEXT("Launch the executable in %s."), *FPaths::ConvertRelativePathToFull(UTinyRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path))),
 		FSlateIcon {FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("Icons.Launch"))},
 		FUIAction
 		{
@@ -115,12 +115,13 @@ void FTinyRogueEditorModule::PackagedProject(const FString& Configuration, const
 		FString::Printf(
 			TEXT("cmd.exe /c \"\"%s\" -ScriptsForProject=\"%s\" Turnkey -command=VerifySdk -platform=Win64 -UpdateIfNeeded -EditorIO -EditorIOPort=7973 ")
 			TEXT("-project=\"%s\" BuildCookRun -nop4 -utf8output -nocompileeditor -skipbuildeditor -cook ")
-			TEXT("-project=\"%s\" -target=TinyRogue -unrealexe=\"%s\" -platform=Win64 -installed -stage -archive -package -build -pak -iostore -compressed ")
+			TEXT("-project=\"%s\" -target=%s -unrealexe=\"%s\" -platform=Win64 -installed -stage -archive -package -build -pak -iostore -compressed ")
 			TEXT("-prereqs -archivedirectory=\"%s\" -clientconfig=%s %s -nocompile -nocompileuat\""),
 			*RunUATPath,
 			*ProjectPath,
 			*ProjectPath,
 			*ProjectPath,
+			FApp::GetProjectName(),
 			*UEExePath,
 			*PackagedProjectPath,
 			*Configuration,
@@ -143,7 +144,7 @@ void FTinyRogueEditorModule::PackagedProject(const FString& Configuration, const
 
 void FTinyRogueEditorModule::PackagedProjectDevelopment(FMenuBuilder& MenuBuilder)
 {
-	const FString PackagedProjectPath {UTinyRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path};
+	const FString PackagedProjectPath {FPaths::ConvertRelativePathToFull(UTinyRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path)};
 
 	MenuBuilder.AddMenuEntry(
 		FText::FromString(TEXT("Development")),
@@ -158,7 +159,7 @@ void FTinyRogueEditorModule::PackagedProjectDevelopment(FMenuBuilder& MenuBuilde
 
 void FTinyRogueEditorModule::PackagedProjectShipping(FMenuBuilder& MenuBuilder)
 {
-	const FString PackagedProjectPath {UTinyRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path};
+	const FString PackagedProjectPath {FPaths::ConvertRelativePathToFull(UTinyRogueEditorSettings::Get()->PackagedBuildDirectoryPath.Path)};
 
 	MenuBuilder.AddMenuEntry(
 		FText::FromString(TEXT("Shipping")),

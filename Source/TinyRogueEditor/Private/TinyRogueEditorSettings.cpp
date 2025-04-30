@@ -1,7 +1,7 @@
 ﻿#include "TinyRogueEditorSettings.h"
 
 UTinyRogueEditorSettings::UTinyRogueEditorSettings()
-	: PackagedBuildDirectoryPath(TEXT("TinyRogue/PackagedBuild/Windows"))
+	: PackagedBuildDirectoryPath{FPaths::Combine(FPaths::ProjectDir(), TEXT("PackagedBuild"))}
 {
 	CategoryName = TEXT("TinyRogue");
 }
