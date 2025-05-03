@@ -13,6 +13,9 @@ class TINYROGUE_API UUtilityFunctionsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="TinyRogue|UtilityFunctionsLibrary", meta=(DisplayName="Convert To String", CompactNodeTitle="->", BlueprintAutocast))
+	static FString Conv_TimespanToString(const FTimespan& Timespan);
+	
 	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
 	static bool GetTinyRogueGameInstance(UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance);
 	

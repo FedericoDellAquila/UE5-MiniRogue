@@ -3,6 +3,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "TinyRogueGameMode.generated.h"
 
+class UGameStateMachine;
+class UTimeTracker;
 class URollManager;
 
 UCLASS()
@@ -20,6 +22,15 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<URollManager> RollManager;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSoftClassPtr<UGameStateMachine> GameStateMachineClass;
+	
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UGameStateMachine> GameStateMachine;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UTimeTracker> TimeTracker;
+	
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="TinyRogueGameMode")
 	void OnInitGame(const FString& MapName, const FString& Options, const FString& ErrorMessage);

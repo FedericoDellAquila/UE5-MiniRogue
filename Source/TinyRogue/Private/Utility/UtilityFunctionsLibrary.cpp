@@ -1,7 +1,18 @@
 ﻿#include "Utility/UtilityFunctionsLibrary.h"
+
+#include "Log.h"
 #include "Core/TinyRogueGameInstance.h"
 #include "Core/TinyRogueGameMode.h"
 #include "Utility/TinyRogueCheatManager.h"
+
+FString UUtilityFunctionsLibrary::Conv_TimespanToString(const FTimespan& Timespan)
+{
+	FString TimespanString {FString::Printf(TEXT("%02i:%02i:%02i"),
+		FMath::Abs(Timespan.GetHours()),
+		FMath::Abs(Timespan.GetHours()),
+		FMath::Abs(Timespan.GetSeconds()))};
+	return TimespanString;
+}
 
 bool UUtilityFunctionsLibrary::GetTinyRogueGameInstance(UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance)
 {

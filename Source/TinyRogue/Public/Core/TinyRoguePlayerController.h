@@ -3,6 +3,8 @@
 #include "GameFramework/PlayerController.h"
 #include "TinyRoguePlayerController.generated.h"
 
+class UStateMachineComponent;
+
 UCLASS()
 class TINYROGUE_API ATinyRoguePlayerController : public APlayerController
 {
@@ -10,4 +12,7 @@ class TINYROGUE_API ATinyRoguePlayerController : public APlayerController
 
 public:
 	ATinyRoguePlayerController();
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UStateMachineComponent> InputStateMachine;
 };
