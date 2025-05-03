@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-static const FName LogCategory {TEXT("TinyRogueLog")};
+#define LOG_CATEGORY TinyRogueLog
+DECLARE_LOG_CATEGORY_EXTERN(TinyRogueLog, All, All);
+inline DEFINE_LOG_CATEGORY(TinyRogueLog);
 
 // Network Role  
 #define NETWORK_ROLE (!IsValid(GetWorld()) ? TEXT("None")\
@@ -16,7 +18,7 @@ static const FName LogCategory {TEXT("TinyRogueLog")};
 #define STR_CUR_FILE_PATH (FString(__FILE__))
 
 //Current Line Number  
-#define STR_CUR_LINE  (FString::FromInt(__LINE__))
+#define STR_CUR_LINE (FString::FromInt(__LINE__))
 
 // Platform-specific defines
 #if PLATFORM_WINDOWS
@@ -182,23 +184,23 @@ static const FName LogCategory {TEXT("TinyRogueLog")};
 #else
 
 // Example: LOG("Eat {0} {1}.", 5, TEXT("apples"))
-#define LOG(Message, ...)           { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Log, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
+#define LOG(Message, ...)           { UE_LOG(LOG_CATEGORY, Log, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
 // Example: LOG_WARNING("Eat {0} {1}.", 5, TEXT("apples"))    
-#define LOG_WARNING(Message, ...)   { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Warning, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
+#define LOG_WARNING(Message, ...)   { UE_LOG(LOG_CATEGORY, Warning, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
 // Example: LOG_ERROR("Eat {0} {1}.", 5, TEXT("apples"))    
-#define LOG_ERROR(Message, ...)     { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Error, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
+#define LOG_ERROR(Message, ...)     { UE_LOG(LOG_CATEGORY, Error, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
 // Example: LOG_FATAL("Eat {0} {1}.", 5, TEXT("apples"))    
-#define LOG_FATAL(Message, ...)     { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Fatal, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
+#define LOG_FATAL(Message, ...)     { UE_LOG(LOG_CATEGORY, Fatal, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }
 
 
 // Example: CLOG(IsValid(Actor), "Eat {0} {1}.", 5, TEXT("apples"))
-#define CLOG(Condition, Message, ...)           { if (Condition) { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Log, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
+#define CLOG(Condition, Message, ...)           { if (Condition) { UE_LOG(LOG_CATEGORY, Log, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
 // Example: CLOG_WARNING(IsValid(Actor), "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CLOG_WARNING(Condition, Message, ...)   { if (Condition) { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Warning, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
+#define CLOG_WARNING(Condition, Message, ...)   { if (Condition) { UE_LOG(LOG_CATEGORY, Warning, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
 // Example: CLOG_ERROR(IsValid(Actor), "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CLOG_ERROR(Condition, Message, ...)     { if (Condition) { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Error, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
+#define CLOG_ERROR(Condition, Message, ...)     { if (Condition) { UE_LOG(LOG_CATEGORY, Error, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
 // Example: CLOG_FATAL(IsValid(Actor), "Eat {0} {1}.", 5, TEXT("apples"))    
-#define CLOG_FATAL(Condition, Message, ...)     { if (Condition) { GLog->CategorizedLogf(LogCategory, ELogVerbosity::Type::Fatal, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
+#define CLOG_FATAL(Condition, Message, ...)     { if (Condition) { UE_LOG(LOG_CATEGORY, Fatal, TEXT("%s: %s"), *STR_CUR_CLASS_FUN_LINE, *FString::Format(TEXT(Message), TArray<FStringFormatArg>{__VA_ARGS__})); }}
 
 
 // Example: PRINT(10.0f, FColor::Orange, "Eat {0} {1}.", 5, TEXT("apples"))
