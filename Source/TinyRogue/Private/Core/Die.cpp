@@ -84,7 +84,7 @@ void ADie::Tick(float DeltaSeconds)
 
 int32 ADie::GetValue() const
 {
-	int32 BestValue {0};
+	int32 BestValue {};
 	double BestDotProduct {-INFINITY};
 	for (const UDieFace* Face : DieFaces)
 	{
@@ -105,7 +105,7 @@ int32 ADie::GetValue() const
 	return BestValue;
 }
 
-void ADie::RotateFromFaceToFace(int32 FromValue, int32 ToValue) const
+void ADie::RotateFromFaceToFace(const int32 FromValue, const int32 ToValue) const
 {
 	if (FromValue == ToValue)
 		return;
@@ -178,7 +178,7 @@ void ADie::PhysicsSimulationStep(const float DeltaSeconds)
 	}
 }
 
-UDieFace* ADie::GetFaceByValue(int32 Value) const
+UDieFace* ADie::GetFaceByValue(const int32 Value) const
 {
 	TArray<USceneComponent*> ChildrenComponents {};
 	FacesRootComponent->GetChildrenComponents(false, ChildrenComponents);
@@ -206,8 +206,9 @@ void ADie::ReproducePhysicsSimulation(const FPhysicsSimulationData& InPhysicsSim
 	PhysicsSimulationData = InPhysicsSimulationData;
 	PhysicsSimulationIndex = 1;
 
-	SetActorTransform(PhysicsSimulationData.Steps[0]);
-	StartingTransform = GetActorTransform();
+	const FTransform& FirstTransform {PhysicsSimulationData.Steps[0]};	
+	SetActorTransform(FirstTransform);
+	StartingTransform = FirstTransform;
 
 	bIsReplicatingPhysicsSimulation = true;
 }

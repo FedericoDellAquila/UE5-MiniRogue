@@ -27,8 +27,8 @@ public:
 	 *                           Typically, this is a UObject that exists within the world hierarchy.
 	 * @return A pointer to the current UWorld instance, or nullptr if the world context could not be determined.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure="true", Category="ActorUtilityFunctionLibrary", meta=(WorldContext="WorldContextObject"))
-	static UWorld* GetCurrentWorld(UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure="true", Category="ActorUtilityFunctionLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", HidePin="WorldContextObject"))
+	static UWorld* GetWorldFromObject(UObject* WorldContextObject);
 
 	/**
 	 * Clones an actor from the source world to a target world.
@@ -40,9 +40,13 @@ public:
 	 *
 	 * @param SourceActor The actor to be cloned. Must be a valid instance.
 	 * @param TargetWorld The world where the cloned actor will be spawned.
-	 *                    If invalid, the function attempts to determine the world context automatically.
+	 *                    If invalid, the function attempts to determine the world context automatically.s
 	 * @return A pointer to the newly spawned actor copy, or nullptr if cloning was not successful.
 	 */
 	UFUNCTION(BlueprintCallable, Category="ActorUtilityFunctionLibrary")
 	static AActor* CloneActorToWorld(AActor* SourceActor, UWorld* TargetWorld);
+
+	UFUNCTION(BlueprintCallable, Category="ActorUtilityFunctionLibrary", DisplayName="UObject Spawn Actor", meta=(WorldContext="WorldContextObject",
+		DefaultToSelf="WorldContextObject", DeterminesOutputType="Class", DynamicOutputParam="ReturnValue"))
+	static UObject* UObjectSpawnActor(UObject* WorldContextObject, const TSubclassOf<AActor> Class, const FTransform Transform);
 };

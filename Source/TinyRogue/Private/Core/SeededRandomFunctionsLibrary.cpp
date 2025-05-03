@@ -1,108 +1,70 @@
 ﻿#include "Core/SeededRandomFunctionsLibrary.h"
-
-#include "Core/TinyRogueGameMode.h"
+#include "Core/TinyRogueGameInstance.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utility/Log.h"
 
-FRandomStream USeededRandomFunctionsLibrary::GenerateRandomSeed()
+int32 USeededRandomFunctionsLibrary::GetSeededIntegerInRange(UObject* WorldContextObject, const int32 Min, const int32 Max)
 {
-	FRandomStream Seed;
-	Seed.GenerateNewSeed();
-	return Seed;
-}
-
-int32 USeededRandomFunctionsLibrary::GetSeededIntegerInRange(UObject* WorldContextObject, int32 Min, int32 Max)
-{
-	int32 Value;
-	if (const ATinyRogueGameMode* GameMode {Cast<ATinyRogueGameMode>(WorldContextObject->GetWorld()->GetAuthGameMode())}; IsValid(GameMode))
-	{
+	int32 Value {};
+	if (const UTinyRogueGameInstance* GameMode {Cast<UTinyRogueGameInstance>(WorldContextObject->GetWorld()->GetGameInstance())}; IsValid(GameMode))
 		Value = UKismetMathLibrary::RandomIntegerInRangeFromStream(GameMode->GetSeed(), Min, Max);
-	}
 	else
-	{
-		LOG_WARNING("ATinyRogueGameMode not found. Fallback to non-seeded randomness.");
-		Value = UKismetMathLibrary::RandomIntegerInRange(Min, Max);
-	}
-
+		LOG_ERROR("{0} not found.", UTinyRogueGameInstance::StaticClass()->GetName());
+	
 	return Value;
 }
 
-float USeededRandomFunctionsLibrary::GetSeededFloatInRange(UObject* WorldContextObject, float Min, float Max)
+float USeededRandomFunctionsLibrary::GetSeededFloatInRange(UObject* WorldContextObject, const float Min, const float Max)
 {
-	float Value;
-	if (const ATinyRogueGameMode* GameMode = Cast<ATinyRogueGameMode>(WorldContextObject->GetWorld()->GetAuthGameMode()))
-	{
+	float Value {};
+	if (const UTinyRogueGameInstance* GameMode {Cast<UTinyRogueGameInstance>(WorldContextObject->GetWorld()->GetGameInstance())}; IsValid(GameMode))
 		Value = UKismetMathLibrary::RandomFloatInRangeFromStream(GameMode->GetSeed(), Min, Max);
-	}
 	else
-	{
-		LOG_WARNING("ATinyRogueGameMode not found. Fallback to non-seeded randomness.");
-		Value = UKismetMathLibrary::RandomFloatInRange(Min, Max);
-	}
+		LOG_ERROR("{0} not found.", UTinyRogueGameInstance::StaticClass()->GetName());
 
 	return Value;
 }
 
 bool USeededRandomFunctionsLibrary::GetSeededBool(UObject* WorldContextObject)
 {
-	bool bValue;
-	if (const ATinyRogueGameMode* GameMode = Cast<ATinyRogueGameMode>(WorldContextObject->GetWorld()->GetAuthGameMode()))
-	{
+	bool bValue {};
+	if (const UTinyRogueGameInstance* GameMode {Cast<UTinyRogueGameInstance>(WorldContextObject->GetWorld()->GetGameInstance())}; IsValid(GameMode))
 		bValue = UKismetMathLibrary::RandomBoolFromStream(GameMode->GetSeed());
-	}
 	else
-	{
-		LOG_WARNING("ATinyRogueGameMode not found. Fallback to non-seeded randomness.");
-		bValue = UKismetMathLibrary::RandomBool();
-	}
+		LOG_ERROR("{0} not found.", UTinyRogueGameInstance::StaticClass()->GetName());
 
 	return bValue;
 }
 
-FVector USeededRandomFunctionsLibrary::GetSeededUnitVectorInConeInDegrees(UObject* WorldContextObject, FVector ConeDirection, float ConeHalfAngleInDegrees)
+FVector USeededRandomFunctionsLibrary::GetSeededUnitVectorInConeInDegrees(UObject* WorldContextObject, const FVector ConeDirection, const float ConeHalfAngleInDegrees)
 {
-	FVector Value;
-	if (const ATinyRogueGameMode* GameMode {Cast<ATinyRogueGameMode>(WorldContextObject->GetWorld()->GetAuthGameMode())}; IsValid(GameMode))
-	{
+	FVector Value {};
+	if (const UTinyRogueGameInstance* GameMode {Cast<UTinyRogueGameInstance>(WorldContextObject->GetWorld()->GetGameInstance())}; IsValid(GameMode))
 		Value = UKismetMathLibrary::RandomUnitVectorInConeInDegreesFromStream(GameMode->GetSeed(), ConeDirection, ConeHalfAngleInDegrees);
-	}
 	else
-	{
-		LOG_WARNING("ATinyRogueGameMode not found. Fallback to non-seeded randomness.");
-		Value = UKismetMathLibrary::RandomUnitVectorInConeInDegrees(ConeDirection, ConeHalfAngleInDegrees);
-	}
+		LOG_ERROR("{0} not found.", UTinyRogueGameInstance::StaticClass()->GetName());
 
 	return Value;
 }
 
 FVector USeededRandomFunctionsLibrary::GetSeededUnitVector(UObject* WorldContextObject)
 {
-	FVector Value;
-	if (const ATinyRogueGameMode* GameMode {Cast<ATinyRogueGameMode>(WorldContextObject->GetWorld()->GetAuthGameMode())}; IsValid(GameMode))
-	{
+	FVector Value {};
+	if (const UTinyRogueGameInstance* GameMode {Cast<UTinyRogueGameInstance>(WorldContextObject->GetWorld()->GetGameInstance())}; IsValid(GameMode))
 		Value = UKismetMathLibrary::RandomUnitVectorFromStream(GameMode->GetSeed());
-	}
 	else
-	{
-		LOG_WARNING("ATinyRogueGameMode not found. Fallback to non-seeded randomness.");
-		Value = UKismetMathLibrary::RandomUnitVector();
-	}
+		LOG_ERROR("{0} not found.", UTinyRogueGameInstance::StaticClass()->GetName());
 
 	return Value;
 }
 
-FRotator USeededRandomFunctionsLibrary::GetSeededRotator(UObject* WorldContextObject, bool bRoll/*= true*/)
+FRotator USeededRandomFunctionsLibrary::GetSeededRotator(UObject* WorldContextObject, const bool bRoll/*= true*/)
 {
-	FRotator Value;
-	if (const ATinyRogueGameMode* GameMode = Cast<ATinyRogueGameMode>(WorldContextObject->GetWorld()->GetAuthGameMode()))
-	{
+	FRotator Value {};
+	if (const UTinyRogueGameInstance* GameMode {Cast<UTinyRogueGameInstance>(WorldContextObject->GetWorld()->GetGameInstance())}; IsValid(GameMode))
 		Value = UKismetMathLibrary::RandomRotatorFromStream(GameMode->GetSeed(), bRoll);
-	}
 	else
-	{
-		LOG_WARNING("ATinyRogueGameMode not found. Fallback to non-seeded randomness.");
-		Value = UKismetMathLibrary::RandomRotator();
-	}
+		LOG_ERROR("{0} not found.", UTinyRogueGameInstance::StaticClass()->GetName());
 
 	return Value;
 }

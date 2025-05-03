@@ -2,25 +2,24 @@
 #include "Core/RollManager/PhysicsSimulationWorldManager.h"
 #include "Core/SeededRandomFunctionsLibrary.h"
 
-void ARollManager::PostInitializeComponents()
+UPhysicsWorldSimulationManager* URollManager::GetPhysicsWorldSimulationManager()
 {
-	Super::PostInitializeComponents();
-
 	if (IsValid(PhysicsWorldSimulationManager) == false)
-		PhysicsWorldSimulationManager = NewObject<UPhysicsWorldSimulationManager>(this);
+		PhysicsWorldSimulationManager = NewObject<UPhysicsWorldSimulationManager>(this, TEXT("PhysicsWorldSimulationManager"));
+
+	return PhysicsWorldSimulationManager;
 }
 
-void ARollManager::ReproduceRollSimulation_Implementation(const TArray<int32>& DiceValues)
+void URollManager::ReproduceRollSimulation_Implementation(const TArray<int32>& DiceValues)
 {
-	
 }
 
-TArray<FPhysicsSimulationData> ARollManager::SimulateRoll_Implementation(const int32 NumDice) const
+TArray<FPhysicsSimulationData> URollManager::SimulateRoll_Implementation(const int32 NumDice)
 {
 	return {};
 }
 
-TArray<int32> ARollManager::DetermineDiceValues_Implementation(const int32 NumDice) const
+TArray<int32> URollManager::DetermineDiceValues_Implementation(const int32 NumDice)
 {
 	if (NumDice == 0)
 		return {};
@@ -31,5 +30,3 @@ TArray<int32> ARollManager::DetermineDiceValues_Implementation(const int32 NumDi
 		Results[i] = USeededRandomFunctionsLibrary::GetSeededIntegerInRange(GetWorld(), 1, 6);
 	return Results;
 }
-
-

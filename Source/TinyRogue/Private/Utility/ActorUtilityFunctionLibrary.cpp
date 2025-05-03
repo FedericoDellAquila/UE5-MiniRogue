@@ -1,8 +1,7 @@
 ﻿#include "Utility/ActorUtilityFunctionLibrary.h"
-
 #include "Log.h"
 
-UWorld* UActorUtilityFunctionLibrary::GetCurrentWorld(UObject* WorldContextObject)
+UWorld* UActorUtilityFunctionLibrary::GetWorldFromObject(UObject* WorldContextObject)
 {
 	if (IsValid(GEngine) == false)
 	{
@@ -22,7 +21,7 @@ AActor* UActorUtilityFunctionLibrary::CloneActorToWorld(AActor* SourceActor, UWo
 
 	if (IsValid(TargetWorld) == false)
 	{
-		TargetWorld = GetCurrentWorld(SourceActor);
+		TargetWorld = GetWorldFromObject(SourceActor);
 	}
 
 	FActorSpawnParameters SpawnParams;
@@ -31,4 +30,19 @@ AActor* UActorUtilityFunctionLibrary::CloneActorToWorld(AActor* SourceActor, UWo
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Name = MakeUniqueObjectName(TargetWorld, SourceActor->GetClass(), NAME_None, EUniqueObjectNameOptions::GloballyUnique);
 	return TargetWorld->SpawnActor<AActor>(SourceActor->GetClass(), SpawnParams);
+}
+
+UObject* UActorUtilityFunctionLibrary::UObjectSpawnActor(UObject* WorldContextObject, const TSubclassOf<AActor> Class, const FTransform Transform)
+{
+	if (IsValid(Class) == false)
+		return nullptr;
+	
+	UWorld* World {GetWorldFromObject(WorldContextObject)};
+	if (IsValid(World) == false)
+	{
+		LOG_ERROR("World is nullptr.")
+		return nullptr;
+	}
+
+	return World->SpawnActor<AActor>(Class, Transform);
 }

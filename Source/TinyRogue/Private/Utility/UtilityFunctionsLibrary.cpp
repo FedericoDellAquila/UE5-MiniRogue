@@ -1,8 +1,20 @@
 ﻿#include "Utility/UtilityFunctionsLibrary.h"
-#include "Log.h"
+#include "Core/TinyRogueGameInstance.h"
 #include "Core/TinyRogueGameMode.h"
-#include "Core/TinyRogueProjectSettings.h"
 #include "Utility/TinyRogueCheatManager.h"
+
+bool UUtilityFunctionsLibrary::GetTinyRogueGameInstance(UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance)
+{
+	if (IsValid(GEngine) == false)
+		return false;
+	
+	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
+	if (IsValid(World) == false)
+		return false;
+	
+	OutGameInstance = Cast<UTinyRogueGameInstance>(World->GetGameInstance());
+	return IsValid(OutGameInstance);
+}
 
 bool UUtilityFunctionsLibrary::GetTinyRogueGameMode(UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode)
 {
