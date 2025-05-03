@@ -13,7 +13,7 @@ class TINYROGUE_API UUtilityFunctionsLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
-	static bool GetGameplayGameMode(UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode);
+	static bool GetTinyRogueGameMode(UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode);
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
 	static bool GetCheatManager(UObject* WorldContextObject, UTinyRogueCheatManager*& OutCheatManager);
@@ -22,11 +22,12 @@ public:
 	static FTransform LerpTransform(FTransform Start, FTransform End, float Alpha);
 
 	UFUNCTION(BlueprintCallable)
-	static void SetMaxFps(float Value);
+	static void SetMaxFps(const float Value);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure="true")
 	static float GetDefaultPhysicsStepDeltaTime();
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
-	static void DrawActorTransformedBoundingBox(UObject* WorldContextObject, FTransform Transform, AActor* Actor, FLinearColor Color = FLinearColor::Blue, float Duration = 5.0f, float Thickness = 0.2f);
+	static void DrawActorTransformedBoundingBox(const UObject* WorldContextObject, const FTransform Transform,
+		const AActor* Actor, const FLinearColor Color = FLinearColor::Blue, const float Duration = 5.0f, const float Thickness = 0.2f);
 };

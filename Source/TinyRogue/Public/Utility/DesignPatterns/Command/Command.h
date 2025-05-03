@@ -1,22 +1,33 @@
-﻿#pragma once
+#pragma once
 #include "CoreMinimal.h"
-#include "UObject/Interface.h"
+#include "Core/WorldObject.h"
 #include "Command.generated.h"
 
-UINTERFACE(BlueprintType)
-class UCommand : public UInterface
-{
-	GENERATED_BODY()
-};
+class UCommandSubsystem;
 
-class TINYROGUE_API ICommand
+UCLASS(Blueprintable, BlueprintType, Abstract)
+class TINYROGUE_API UCommand : public UWorldObject
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UCommand();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
 	void Execute();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
+	void Finish();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
 	void Undo();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
+	bool IsBeingExecuted() const;
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
+	UCommandSubsystem* GetCommandSubsystem() const;
+	
+protected:
+	bool bIsBeingExecuted;
 };

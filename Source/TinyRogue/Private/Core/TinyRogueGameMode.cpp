@@ -1,17 +1,17 @@
 ﻿#include "TinyRogue/Public/Core/TinyRogueGameMode.h"
-#include "Core/PhysicsSimulationWorldManager.h"
+#include "Core/RollManager/RollManager.h"
+#include "Utility/Log.h"
 
 ATinyRogueGameMode::ATinyRogueGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-	, Die(nullptr)
 {}
 
 void ATinyRogueGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
-	if (IsValid(PhysicsWorldSimulationManager) == false)
-		PhysicsWorldSimulationManager = NewObject<UPhysicsWorldSimulationManager>(this);
-
+	RollManager = GetWorld()->SpawnActor<ARollManager>(RollManagerClass.LoadSynchronous());
+	CLOG_FATAL(IsValid(RollManager) == false, "RollManager is nullptr.");
+	
 	OnInitGame(MapName, Options, ErrorMessage);
 }

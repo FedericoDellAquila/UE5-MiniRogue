@@ -1,4 +1,4 @@
-﻿#include "Core/PhysicsSimulationWorldManager.h"
+﻿#include "Core/RollManager/PhysicsSimulationWorldManager.h"
 #include "Physics/Experimental/PhysScene_Chaos.h"
 #include "Utility/Log.h"
 #include "Utility/UtilityFunctionsLibrary.h"
@@ -86,33 +86,31 @@ TArray<AActor*> UPhysicsWorldSimulationManager::CopyPhysicsActors(TArray<AActor*
 	return Clones;
 }
 
-TArray<AActor*> UPhysicsWorldSimulationManager::SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms)
+void UPhysicsWorldSimulationManager::SpawnPhysicsActors(const TSubclassOf<AActor> ActorClass, TArray<FTransform> Transforms, TArray<AActor*>& SpawnedPhysicsActors)
 {
 	if (IsValid(SimulationWorld) == false)
 	{
 		LOG_ERROR("SimulationWorld is nullptr.")
-		return {};
+		return;
 	}
 
-	if (ActorClass.IsNull())
+	if (IsValid(ActorClass) == false)
 	{
 		LOG_ERROR("ActorClass is nullptr.")
-		return {};
+		return;
 	}
 
-	TArray<AActor*> SpawnedActors;
 	for (const FTransform& Transform : Transforms)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		AActor* NewActor {SimulationWorld->SpawnActor<AActor>(ActorClass.LoadSynchronous(), Transform, SpawnParams)};
+		AActor* NewActor {SimulationWorld->SpawnActor<AActor>(ActorClass, Transform, SpawnParams)};
 		NewActor->OnDestroyed.AddUniqueDynamic(this, &ThisClass::OnPhysicsActorDestroyed);
-		SpawnedActors.Emplace(NewActor);
+		SpawnedPhysicsActors.Emplace(NewActor);
 	}
 
-	PhysicsActors.Append(SpawnedActors);
-	return SpawnedActors;
+	PhysicsActors.Append(SpawnedPhysicsActors);
 }
 
 TArray<FPhysicsSimulationData> UPhysicsWorldSimulationManager::PerformPhysicsSimulation(FPhysicsSimulationParameters PhysicsSimulationParameters, int32 MaxSteps/*= 500*/, bool bAutoDestroySimulationWorld/*= true*/)

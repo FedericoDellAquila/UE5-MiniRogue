@@ -17,5 +17,5 @@ public:
 	 *               Non-numeric entries are disregarded.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TinyRogue|CheatManager")
-	void SimulateDiceRoll(const TArray<FString>& Values) const;
+	void SimulateDiceRoll(const TArray<FString>& Values);
 };

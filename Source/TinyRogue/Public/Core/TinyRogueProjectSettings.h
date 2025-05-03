@@ -10,7 +10,13 @@ class TINYROGUE_API UTinyRogueProjectSettings : public UDeveloperSettings
 
 public:
 	UTinyRogueProjectSettings();
-
+	
 	UFUNCTION(BlueprintCallable, DisplayName="Get Tiny Rogue Project Settings")
 	static const UTinyRogueProjectSettings* Get();
+
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly)
+	bool bUsePredeterminedSeed;
+	
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bUsePredeterminedSeed", UIMin="0"))
+	int32 PredeterminedSeed;
 };

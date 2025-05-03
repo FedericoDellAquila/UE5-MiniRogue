@@ -4,19 +4,37 @@
 #include "Core/TinyRogueProjectSettings.h"
 #include "Utility/TinyRogueCheatManager.h"
 
-bool UUtilityFunctionsLibrary::GetGameplayGameMode(UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode)
+bool UUtilityFunctionsLibrary::GetTinyRogueGameMode(UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode)
 {
-	OutGameMode = Cast<ATinyRogueGameMode>(WorldContextObject->GetWorld()->GetAuthGameMode());
+	if (IsValid(GEngine) == false)
+		return false;
+	
+	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
+	if (IsValid(World) == false)
+		return false;
+	
+	OutGameMode = Cast<ATinyRogueGameMode>(World->GetAuthGameMode());
 	return IsValid(OutGameMode);
 }
 
 bool UUtilityFunctionsLibrary::GetCheatManager(UObject* WorldContextObject, UTinyRogueCheatManager*& OutCheatManager)
 {
-	OutCheatManager = Cast<UTinyRogueCheatManager>(WorldContextObject->GetWorld()->GetFirstPlayerController()->CheatManager);
+	if (IsValid(GEngine) == false)
+		return false;
+	
+	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
+	if (IsValid(World) == false)
+		return false;
+
+	const APlayerController* PlayerController {World->GetFirstPlayerController()};
+	if (IsValid(PlayerController) == false)
+		return false;
+	
+	OutCheatManager = Cast<UTinyRogueCheatManager>(PlayerController->CheatManager);
 	return IsValid(OutCheatManager);
 }
 
-FTransform UUtilityFunctionsLibrary::LerpTransform(FTransform Start, FTransform End, float Alpha)
+FTransform UUtilityFunctionsLibrary::LerpTransform(const FTransform Start, const FTransform End, const float Alpha)
 {
 	const FVector NewLocation {FMath::Lerp(Start.GetLocation(), End.GetLocation(), Alpha)};
 	const FQuat NewRotation {FQuat::Slerp(Start.GetRotation(), End.GetRotation(), Alpha)};
@@ -26,7 +44,7 @@ FTransform UUtilityFunctionsLibrary::LerpTransform(FTransform Start, FTransform 
 	return ResultTransform;
 }
 
-void UUtilityFunctionsLibrary::SetMaxFps(float Value)
+void UUtilityFunctionsLibrary::SetMaxFps(const float Value)
 {
 	IConsoleVariable* MaxFPSEditorVar {IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"))};
 	MaxFPSEditorVar->Set(Value, ECVF_SetByConsole);
@@ -43,9 +61,10 @@ float UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime()
 	return 1.0f / MaxFPSValue;
 }
 
-void UUtilityFunctionsLibrary::DrawActorTransformedBoundingBox(UObject* WorldContextObject, FTransform Transform, AActor* Actor, FLinearColor Color, float Duration, float Thickness)
+void UUtilityFunctionsLibrary::DrawActorTransformedBoundingBox(const UObject* WorldContextObject, const FTransform Transform,
+	const AActor* Actor, const FLinearColor Color, const float Duration, const float Thickness)
 {
-	if (IsValid(Actor) == false)
+	if (IsValid(GEngine) == false || IsValid(Actor) == false)
 		return;
 
 	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};

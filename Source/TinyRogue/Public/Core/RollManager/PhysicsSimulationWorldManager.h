@@ -2,6 +2,8 @@
 #include "CoreMinimal.h"
 #include "PhysicsSimulationWorldManager.generated.h"
 
+// TODO: separated these structs in their own file so that they can be included by ADie without all the rest
+
 USTRUCT(BlueprintType)
 struct FPhysicsSimulationParameters
 {
@@ -72,8 +74,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<AActor*> CopyPhysicsActors(TArray<AActor*> InPhysicsActors);
 
-	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName="Spawned Physics Actors"))
-	TArray<AActor*> SpawnPhysicsActors(TSoftClassPtr<AActor> ActorClass, TArray<FTransform> Transforms);
+	UFUNCTION(BlueprintCallable, meta=(DeterminesOutputType="ActorClass", DynamicOutputParam="SpawnedPhysicsActors"))
+	void SpawnPhysicsActors(const TSubclassOf<AActor> ActorClass, TArray<FTransform> Transforms, TArray<AActor*>& SpawnedPhysicsActors);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure="true")
 	UWorld* GetSimulationWorld() const { return SimulationWorld; }
