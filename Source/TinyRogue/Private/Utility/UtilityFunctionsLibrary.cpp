@@ -7,7 +7,7 @@
 
 FString UUtilityFunctionsLibrary::Conv_TimespanToString(const FTimespan& Timespan)
 {
-	FString TimespanString {FString::Printf(TEXT("%02i:%02i:%02i"),
+	const FString TimespanString {FString::Printf(TEXT("%02i:%02i:%02i"),
 		FMath::Abs(Timespan.GetHours()),
 		FMath::Abs(Timespan.GetHours()),
 		FMath::Abs(Timespan.GetSeconds()))};
