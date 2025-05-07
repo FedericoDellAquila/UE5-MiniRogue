@@ -2,7 +2,7 @@
 #include "Components/HealthComponent.h"
 
 AMonsterCard::AMonsterCard()
-	: Data{}
+	: EnemyData{}
 {
 	PrimaryActorTick.bCanEverTick = true;
 

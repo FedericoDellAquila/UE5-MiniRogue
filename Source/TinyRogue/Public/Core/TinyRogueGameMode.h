@@ -1,32 +1,12 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
+#include "Cards/DungeonLevelsDataTableRow.h"
 #include "GameFramework/GameModeBase.h"
 #include "TinyRogueGameMode.generated.h"
 
 class UGameStateMachine;
 class UTimeTracker;
 class URollManager;
-
-USTRUCT(BlueprintType)
-struct FDungeonLevel
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FString LevelName;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 NumberOfRooms;
-};
-
-USTRUCT(BlueprintType)
-struct FDungeon
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<FDungeonLevel> Levels;
-};
 
 UCLASS()
 class TINYROGUE_API ATinyRogueGameMode : public AGameModeBase
@@ -54,11 +34,11 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UTimeTracker> TimeTracker;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FDungeon Dungeon;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(RequiredAssetDataTags="RowStructure=/Script/TinyRogue.DungeonLevelsDataTableRow"))
+	TObjectPtr<UDataTable> DungeonLevelsDataTable;
+	
 	UFUNCTION(BlueprintCallable)
-	FDungeonLevel GetCurrentDungeonLevel() const;
+	FDungeonLevelsDataTableRow GetCurrentDungeonLevel() const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetRoomIndex(const int32 RoomIndex);
@@ -76,7 +56,7 @@ public:
 	int32 GetCurrentRoom() const;
 
 	UFUNCTION(BlueprintCallable)
-	void GetCurrentPosition(int32& RoomIndex, FDungeonLevel& DungeonLevel);
+	void GetCurrentPosition(int32& RoomIndex, FDungeonLevelsDataTableRow& DungeonLevel) const;
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetMaxNumberOfRooms() const { return MaxNumberOfRooms; };
@@ -84,8 +64,13 @@ public:
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="TinyRogueGameMode")
 	void OnInitGame(const FString& MapName, const FString& Options, const FString& ErrorMessage);
-
+	
 	int32 LevelIndex;
 	int32 RoomIndexInLevel;
 	int32 MaxNumberOfRooms;
+
+private:
+	TArray<FName> GetLevelsNames() const;
+	const FDungeonLevelsDataTableRow* GetDungeonLevelData(const FName& DungeonLevelName) const;
+	TArray<const FDungeonLevelsDataTableRow*> GetDungeonLevelsData() const;
 };

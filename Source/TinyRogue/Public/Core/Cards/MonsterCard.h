@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Card.h"
-#include "MonsterDataTableRow.h"
+#include "DungeonLevelsDataTableRow.h"
 #include "MonsterCard.generated.h"
 
 class UHealthComponent;
@@ -18,5 +18,5 @@ public:
 	TObjectPtr<UHealthComponent> HealthComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FMonsterDataTableRow Data;
+	FEnemyData EnemyData;
 };
