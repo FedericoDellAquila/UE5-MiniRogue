@@ -1,10 +1,10 @@
 ﻿#include "Core/TinyRoguePlayerController.h"
+
+#include "Core/GameStateMachine/StateMachineComponent.h"
 #include "Utility/TinyRogueCheatManager.h"
-#include "Utility/DesignPatterns/StateMachine/StateMachineComponent.h"
 
 ATinyRoguePlayerController::ATinyRoguePlayerController()
 {
 	CheatClass = UTinyRogueCheatManager::StaticClass();
-
 	InputStateMachine = CreateDefaultSubobject<UStateMachineComponent>(TEXT("InputStateMachine"));
 }

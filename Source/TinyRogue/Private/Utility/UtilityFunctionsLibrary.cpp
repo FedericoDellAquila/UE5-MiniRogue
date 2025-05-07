@@ -1,17 +1,46 @@
 ﻿#include "Utility/UtilityFunctionsLibrary.h"
-
-#include "Log.h"
 #include "Core/TinyRogueGameInstance.h"
 #include "Core/TinyRogueGameMode.h"
+#include "Core/TinyRoguePlayerController.h"
 #include "Utility/TinyRogueCheatManager.h"
+#include "Utility/DesignPatterns/StateMachine/StateInterface.h"
+
+bool UUtilityFunctionsLibrary::CreateStateObject(AActor* Outer, const TSoftClassPtr<UObject> Class, TScriptInterface<IStateInterface>& OutState)
+{
+	if (Class.IsNull())
+		return false;
+
+	const UClass* ClassPtr {Class.LoadSynchronous()};
+	if (ClassPtr->ImplementsInterface(UStateInterface::StaticClass()) == false)
+		return false;
+	
+	UObject* NewStateObject {NewObject<UObject>(Outer, ClassPtr)};
+
+	OutState.SetObject(NewStateObject);
+	OutState.SetInterface(Cast<IStateInterface>(NewStateObject));
+	return true;
+}
 
 FString UUtilityFunctionsLibrary::Conv_TimespanToString(const FTimespan& Timespan)
 {
 	const FString TimespanString {FString::Printf(TEXT("%02i:%02i:%02i"),
 		FMath::Abs(Timespan.GetHours()),
-		FMath::Abs(Timespan.GetHours()),
+		FMath::Abs(Timespan.GetMinutes()),
 		FMath::Abs(Timespan.GetSeconds()))};
 	return TimespanString;
+}
+
+bool UUtilityFunctionsLibrary::GetTinyRoguePlayerController(UObject* WorldContextObject, ATinyRoguePlayerController*& OutPlayerController)
+{
+	if (IsValid(GEngine) == false)
+		return false;
+	
+	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
+	if (IsValid(World) == false)
+		return false;
+	
+	OutPlayerController = Cast<ATinyRoguePlayerController>(World->GetFirstPlayerController());
+	return IsValid(OutPlayerController);
 }
 
 bool UUtilityFunctionsLibrary::GetTinyRogueGameInstance(UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance)
@@ -76,7 +105,7 @@ void UUtilityFunctionsLibrary::SetMaxFps(const float Value)
 float UUtilityFunctionsLibrary::GetDefaultPhysicsStepDeltaTime()
 {
 	const IConsoleVariable* MaxFPSEditorVar {IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"))};
-	float MaxFPSValue = MaxFPSEditorVar ? MaxFPSEditorVar->GetFloat() : -1.0f;
+	float MaxFPSValue {MaxFPSEditorVar ? MaxFPSEditorVar->GetFloat() : -1.0f};
 
 	if (MaxFPSValue <= 0.0f)
 		MaxFPSValue = 120.0f;

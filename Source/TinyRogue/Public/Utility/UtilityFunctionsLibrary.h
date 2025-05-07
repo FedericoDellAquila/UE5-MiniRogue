@@ -3,6 +3,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UtilityFunctionsLibrary.generated.h"
 
+class IStateInterface;
+class ATinyRoguePlayerController;
 class UTinyRogueGameInstance;
 class UTinyRogueCheatManager;
 class ATinyRogueGameMode;
@@ -13,8 +15,14 @@ class TINYROGUE_API UUtilityFunctionsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(DefaultToSelf="Outer"))
+	static bool CreateStateObject(AActor* Outer, const TSoftClassPtr<UObject> Class, TScriptInterface<IStateInterface>& OutState);
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="TinyRogue|UtilityFunctionsLibrary", meta=(DisplayName="Convert To String", CompactNodeTitle="->", BlueprintAutocast))
 	static FString Conv_TimespanToString(const FTimespan& Timespan);
+
+	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
+	static bool GetTinyRoguePlayerController(UObject* WorldContextObject, ATinyRoguePlayerController*& OutPlayerController);
 	
 	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
 	static bool GetTinyRogueGameInstance(UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance);

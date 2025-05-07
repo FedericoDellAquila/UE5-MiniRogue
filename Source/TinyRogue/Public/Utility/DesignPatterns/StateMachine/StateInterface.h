@@ -1,17 +1,21 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "State.generated.h"
+#include "StateInterface.generated.h"
 
-class IStateMachine;
+class IStateInterface;
+class IStateMachineInterface;
 
 UINTERFACE(BlueprintType)
-class UState : public UInterface
+class UStateInterface : public UInterface
 {
 	GENERATED_BODY()
+
+public:
+	static bool CreateStateObject(AActor* Outer, const TSoftClassPtr<UObject> Class, TScriptInterface<IStateInterface>& OutState);
 };
 
-class TINYROGUE_API IState
+class TINYROGUE_API IStateInterface
 {
 	GENERATED_BODY()
 
@@ -26,8 +30,8 @@ public:
 	void Exit();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void AssignStateMachine(const TScriptInterface<IStateMachine>& InStateMachine);
+	void AssignStateMachine(const TScriptInterface<IStateMachineInterface>& InStateMachine);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	TScriptInterface<IStateMachine> GetStateMachine() const;
+	TScriptInterface<IStateMachineInterface> GetStateMachine() const;
 };

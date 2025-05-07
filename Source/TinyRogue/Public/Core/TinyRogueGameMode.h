@@ -5,7 +5,7 @@
 #include "TinyRogueGameMode.generated.h"
 
 class UDungeonLevelManagerComponent;
-class UGameStateMachine;
+class UStateMachineComponent;
 class UTimeTracker;
 class URollManagerComponent;
 
@@ -22,12 +22,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<URollManagerComponent> RollManager;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<UGameStateMachine> GameStateMachineClass;
 	
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UGameStateMachine> GameStateMachine;
+	TObjectPtr<UStateMachineComponent> GameStateMachine;
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UTimeTracker> TimeTracker;

@@ -13,6 +13,6 @@ class TINYROGUE_API ATinyRoguePlayerController : public APlayerController
 public:
 	ATinyRoguePlayerController();
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStateMachineComponent> InputStateMachine;
 };
