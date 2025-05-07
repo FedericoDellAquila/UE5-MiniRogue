@@ -2,10 +2,10 @@
 #include "CoreMinimal.h"
 #include "PhysicsSimulationWorldManager.h"
 #include "Core/WorldObject.h"
-#include "RollManager.generated.h"
+#include "RollManagerComponent.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class TINYROGUE_API URollManager : public UWorldObject
+class TINYROGUE_API URollManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

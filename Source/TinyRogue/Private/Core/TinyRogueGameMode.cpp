@@ -1,9 +1,9 @@
 ﻿#include "TinyRogue/Public/Core/TinyRogueGameMode.h"
 
-#include "Core/DungeonLevelManager.h"
+#include "Core/DungeonLevelManagerComponent.h"
 #include "Core/GameStateMachine/GameStateMachine.h"
 #include "Core/TimerTracker.h"
-#include "Core/RollManager/RollManager.h"
+#include "Core/RollManager/RollManagerComponent.h"
 #include "GameFramework/GameMode.h"
 #include "Utility/Log.h"
 
@@ -11,7 +11,7 @@
 
 ATinyRogueGameMode::ATinyRogueGameMode()
 {
-	DungeonLevelManager = CreateDefaultSubobject<UDungeonLevelManager>(TEXT("DungeonLevelManager"));
+	DungeonLevelManager = CreateDefaultSubobject<UDungeonLevelManagerComponent>(TEXT("DungeonLevelManager"));
 }
 
 void ATinyRogueGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -19,7 +19,7 @@ void ATinyRogueGameMode::InitGame(const FString& MapName, const FString& Options
 	Super::InitGame(MapName, Options, ErrorMessage);
 
 	if (IsValid(RollManager) == false)
-		RollManager = NewObject<URollManager>(this, RollManagerClass.LoadSynchronous());
+		RollManager = Cast<URollManagerComponent>(GetComponentByClass(URollManagerComponent::StaticClass()));
 	
 	CLOG_FATAL(IsValid(RollManager) == false, "RollManager is nullptr.");
 

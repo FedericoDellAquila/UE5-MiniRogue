@@ -1,7 +1,7 @@
 ﻿#include "Utility/TinyRogueCheatManager.h"
 
 #include "Log.h"
-#include "Core/RollManager/RollManager.h"
+#include "Core/RollManager/RollManagerComponent.h"
 #include "Core/SeededRandomFunctionsLibrary.h"
 #include "Core/TinyRogueGameMode.h"
 #include "Utility/UtilityFunctionsLibrary.h"

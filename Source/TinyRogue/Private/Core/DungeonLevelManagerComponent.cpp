@@ -1,22 +1,22 @@
-#include "Core/DungeonLevelManager.h"
+#include "Core/DungeonLevelManagerComponent.h"
 
 #include "Core/Cards/DungeonLevelsDataTableRow.h"
 #include "Utility/Log.h"
 
-UDungeonLevelManager::UDungeonLevelManager()
+UDungeonLevelManagerComponent::UDungeonLevelManagerComponent()
 	: StartingRoom(0)
 	, CurrentRoom(0)
 	, MaxNumberOfRooms(0)
 {}
 
-void UDungeonLevelManager::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UDungeonLevelManagerComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	Initialize();
 }
 
-void UDungeonLevelManager::Initialize()
+void UDungeonLevelManagerComponent::Initialize()
 {
 	if (IsValid(DungeonLevelsDataTable) == false)
 	{
@@ -55,14 +55,14 @@ void UDungeonLevelManager::Initialize()
 	CurrentRoom = StartingRoom;
 }
 
-bool UDungeonLevelManager::TryGetCurrentLevel(FDungeonLevel& Level) const
+bool UDungeonLevelManagerComponent::TryGetCurrentLevel(FDungeonLevel& Level) const
 {
 	int32 LevelIndex {};
 	int32 RoomIndex {};
 	return TryGetCurrentDungeonLevelData(LevelIndex, RoomIndex, Level);
 }
 
-bool UDungeonLevelManager::TrySetCurrentRoom(int32 NewRoomIndex)
+bool UDungeonLevelManagerComponent::TrySetCurrentRoom(int32 NewRoomIndex)
 {
 	ClampRoomIndexValue(NewRoomIndex);
 	
@@ -74,7 +74,7 @@ bool UDungeonLevelManager::TrySetCurrentRoom(int32 NewRoomIndex)
 	return false;
 }
 
-bool UDungeonLevelManager::TryMoveToNextRoom(bool& bNewLevel)
+bool UDungeonLevelManagerComponent::TryMoveToNextRoom(bool& bNewLevel)
 {
 	FDungeonLevel Level {};
 	if (TryGetCurrentLevel(Level) == false)
@@ -100,7 +100,7 @@ bool UDungeonLevelManager::TryMoveToNextRoom(bool& bNewLevel)
 	return true;
 }
 
-bool UDungeonLevelManager::TryDropToNextLevel()
+bool UDungeonLevelManagerComponent::TryDropToNextLevel()
 {
 	FDungeonLevel Level {};
 	if (TryGetCurrentLevel(Level) == false)
@@ -121,7 +121,7 @@ bool UDungeonLevelManager::TryDropToNextLevel()
 	return true;
 }
 
-bool UDungeonLevelManager::TryGetCurrentDungeonLevelData(int32& LevelIndex, int32& RoomIndex, FDungeonLevel& LevelData) const
+bool UDungeonLevelManagerComponent::TryGetCurrentDungeonLevelData(int32& LevelIndex, int32& RoomIndex, FDungeonLevel& LevelData) const
 {
 	const bool bResult {TryMapCurrentRoomToLevelAndRelativeRoom(CurrentRoom, LevelIndex, RoomIndex)};
 	if (bResult == false)
@@ -134,7 +134,7 @@ bool UDungeonLevelManager::TryGetCurrentDungeonLevelData(int32& LevelIndex, int3
 	return true;
 }
 
-bool UDungeonLevelManager::TryMapCurrentRoomToLevelAndRelativeRoom(int32 GlobalIndex, int32& OutLevelIndex, int32& OutRoomInLevel) const
+bool UDungeonLevelManagerComponent::TryMapCurrentRoomToLevelAndRelativeRoom(int32 GlobalIndex, int32& OutLevelIndex, int32& OutRoomInLevel) const
 {
 	ClampRoomIndexValue(GlobalIndex);
 
@@ -155,7 +155,7 @@ bool UDungeonLevelManager::TryMapCurrentRoomToLevelAndRelativeRoom(int32 GlobalI
 	return false;
 }
 
-void UDungeonLevelManager::ClampRoomIndexValue(int& RoomIndex) const
+void UDungeonLevelManagerComponent::ClampRoomIndexValue(int& RoomIndex) const
 {
 	if (RoomIndex < 0)
 	{
@@ -169,7 +169,7 @@ void UDungeonLevelManager::ClampRoomIndexValue(int& RoomIndex) const
 	}
 }
 
-void UDungeonLevelManager::ClampLevelIndexValue(int& LevelIndex) const
+void UDungeonLevelManagerComponent::ClampLevelIndexValue(int& LevelIndex) const
 {
 	if (LevelIndex < 0)
 	{

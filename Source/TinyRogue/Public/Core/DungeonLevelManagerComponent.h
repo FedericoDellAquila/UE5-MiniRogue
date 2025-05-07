@@ -2,7 +2,7 @@
 #include "CoreMinimal.h"
 #include "Cards/DungeonLevelsDataTableRow.h"
 #include "UObject/Object.h"
-#include "DungeonLevelManager.generated.h"
+#include "DungeonLevelManagerComponent.generated.h"
 
 USTRUCT(BlueprintType)
 struct FDungeonLevel
@@ -17,7 +17,7 @@ struct FDungeonLevel
 };
 
 UCLASS()
-class TINYROGUE_API UDungeonLevelManager : public UActorComponent
+class TINYROGUE_API UDungeonLevelManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	
@@ -25,7 +25,7 @@ protected:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	
 public:
-	UDungeonLevelManager();
+	UDungeonLevelManagerComponent();
 
 	UFUNCTION(BlueprintCallable)
 	void Initialize();

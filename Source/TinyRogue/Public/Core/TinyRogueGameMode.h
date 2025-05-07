@@ -4,10 +4,10 @@
 #include "GameFramework/GameModeBase.h"
 #include "TinyRogueGameMode.generated.h"
 
-class UDungeonLevelManager;
+class UDungeonLevelManagerComponent;
 class UGameStateMachine;
 class UTimeTracker;
-class URollManager;
+class URollManagerComponent;
 
 UCLASS()
 class TINYROGUE_API ATinyRogueGameMode : public AGameModeBase
@@ -20,11 +20,8 @@ protected:
 public:
 	ATinyRogueGameMode();
 	
-	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<URollManager> RollManagerClass;
-
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<URollManager> RollManager;
+	TObjectPtr<URollManagerComponent> RollManager;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<UGameStateMachine> GameStateMachineClass;
@@ -36,7 +33,7 @@ public:
 	TObjectPtr<UTimeTracker> TimeTracker;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UDungeonLevelManager> DungeonLevelManager;
+	TObjectPtr<UDungeonLevelManagerComponent> DungeonLevelManager;
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="TinyRogueGameMode")
