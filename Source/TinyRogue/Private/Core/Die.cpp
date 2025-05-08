@@ -24,16 +24,10 @@ ADie::ADie()
 		MeshComponent->SetSimulatePhysics(true);
 
 		if (const ConstructorHelpers::FObjectFinder<UStaticMesh> StaticMeshAsset {TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'")}; StaticMeshAsset.Succeeded())
-		{
 			MeshComponent->SetStaticMesh(StaticMeshAsset.Object);
-		}
 
-		if (const ConstructorHelpers::FObjectFinder<UMaterial> MaterialAsset {
-			TEXT("Material'/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial'")
-		}; MaterialAsset.Succeeded())
-		{
+		if (const ConstructorHelpers::FObjectFinder<UMaterial> MaterialAsset { TEXT("Material'/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial'") }; MaterialAsset.Succeeded())
 			MeshComponent->SetMaterial(0, MaterialAsset.Object);
-		}
 	}
 
 	FacesRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("FacesRootComponent"));

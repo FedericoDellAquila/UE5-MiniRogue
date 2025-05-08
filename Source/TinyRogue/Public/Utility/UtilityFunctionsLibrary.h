@@ -22,16 +22,16 @@ public:
 	static FString Conv_TimespanToString(const FTimespan& Timespan);
 
 	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
-	static bool GetTinyRoguePlayerController(UObject* WorldContextObject, ATinyRoguePlayerController*& OutPlayerController);
+	static bool GetTinyRoguePlayerController(const UObject* WorldContextObject, ATinyRoguePlayerController*& OutPlayerController);
 	
 	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
-	static bool GetTinyRogueGameInstance(UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance);
+	static bool GetTinyRogueGameInstance(const UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance);
 	
 	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
-	static bool GetTinyRogueGameMode(UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode);
+	static bool GetTinyRogueGameMode(const UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode);
 
 	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary", meta=(WorldContext="WorldContextObject", DefaultToSelf="WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
-	static bool GetCheatManager(UObject* WorldContextObject, UTinyRogueCheatManager*& OutCheatManager);
+	static bool GetCheatManager(const UObject* WorldContextObject, UTinyRogueCheatManager*& OutCheatManager);
 
 	UFUNCTION(BlueprintCallable, Category="TinyRogue|UtilityFunctionsLibrary")
 	static FTransform LerpTransform(FTransform Start, FTransform End, float Alpha);

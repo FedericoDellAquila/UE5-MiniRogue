@@ -11,11 +11,11 @@ bool UUtilityFunctionsLibrary::CreateStateObject(AActor* Outer, const TSoftClass
 		return false;
 
 	const UClass* ClassPtr {Class.LoadSynchronous()};
-	if (ClassPtr->ImplementsInterface(UStateInterface::StaticClass()) == false)
+	if (IsValid(ClassPtr) == false || ClassPtr->ImplementsInterface(UStateInterface::StaticClass()) == false)
 		return false;
 	
 	UObject* NewStateObject {NewObject<UObject>(Outer, ClassPtr)};
-
+	
 	OutState.SetObject(NewStateObject);
 	OutState.SetInterface(Cast<IStateInterface>(NewStateObject));
 	return true;
@@ -30,11 +30,11 @@ FString UUtilityFunctionsLibrary::Conv_TimespanToString(const FTimespan& Timespa
 	return TimespanString;
 }
 
-bool UUtilityFunctionsLibrary::GetTinyRoguePlayerController(UObject* WorldContextObject, ATinyRoguePlayerController*& OutPlayerController)
+bool UUtilityFunctionsLibrary::GetTinyRoguePlayerController(const UObject* WorldContextObject, ATinyRoguePlayerController*& OutPlayerController)
 {
 	if (IsValid(GEngine) == false)
 		return false;
-	
+
 	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
 	if (IsValid(World) == false)
 		return false;
@@ -43,7 +43,7 @@ bool UUtilityFunctionsLibrary::GetTinyRoguePlayerController(UObject* WorldContex
 	return IsValid(OutPlayerController);
 }
 
-bool UUtilityFunctionsLibrary::GetTinyRogueGameInstance(UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance)
+bool UUtilityFunctionsLibrary::GetTinyRogueGameInstance(const UObject* WorldContextObject, UTinyRogueGameInstance*& OutGameInstance)
 {
 	if (IsValid(GEngine) == false)
 		return false;
@@ -56,7 +56,7 @@ bool UUtilityFunctionsLibrary::GetTinyRogueGameInstance(UObject* WorldContextObj
 	return IsValid(OutGameInstance);
 }
 
-bool UUtilityFunctionsLibrary::GetTinyRogueGameMode(UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode)
+bool UUtilityFunctionsLibrary::GetTinyRogueGameMode(const UObject* WorldContextObject, ATinyRogueGameMode*& OutGameMode)
 {
 	if (IsValid(GEngine) == false)
 		return false;
@@ -69,7 +69,7 @@ bool UUtilityFunctionsLibrary::GetTinyRogueGameMode(UObject* WorldContextObject,
 	return IsValid(OutGameMode);
 }
 
-bool UUtilityFunctionsLibrary::GetCheatManager(UObject* WorldContextObject, UTinyRogueCheatManager*& OutCheatManager)
+bool UUtilityFunctionsLibrary::GetCheatManager(const UObject* WorldContextObject, UTinyRogueCheatManager*& OutCheatManager)
 {
 	if (IsValid(GEngine) == false)
 		return false;
