@@ -1,7 +1,5 @@
 ﻿#pragma once
-
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 
 class FTinyRogueEditorModule : public IModuleInterface
 {
@@ -19,5 +17,5 @@ private:
 	static void PackagingToolsSection(FMenuBuilder& MenuBuilder);
 	static void DevelopmentToolsSection(FMenuBuilder& MenuBuilder);
 	static void PackageProjectButton(FMenuBuilder& MenuBuilder);
-	static void ShowToDosListButton(FMenuBuilder& MenuBuilder);
+	static void OpenTrelloButton(FMenuBuilder& MenuBuilder);
 };

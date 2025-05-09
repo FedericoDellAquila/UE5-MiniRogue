@@ -2,6 +2,7 @@
 #include "LevelEditor.h"
 #include "TinyRogueEditorSettings.h"
 #include "HAL/FileManagerGeneric.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Utility/Log.h"
 
 #define LOCTEXT_NAMESPACE "FTinyRogueEditorModule"
@@ -186,7 +187,7 @@ void FTinyRogueEditorModule::DevelopmentToolsSection(FMenuBuilder& MenuBuilder)
 {
 	MenuBuilder.BeginSection(NAME_None, LOCTEXT("Development Tools", "Development Tools"));
 
-	ShowToDosListButton(MenuBuilder);
+	OpenTrelloButton(MenuBuilder);
 
 	MenuBuilder.EndSection();
 }
@@ -206,33 +207,26 @@ void FTinyRogueEditorModule::PackageProjectButton(FMenuBuilder& MenuBuilder)
 	);
 }
 
-void FTinyRogueEditorModule::ShowToDosListButton(FMenuBuilder& MenuBuilder)
+void FTinyRogueEditorModule::OpenTrelloButton(FMenuBuilder& MenuBuilder)
 {
 	MenuBuilder.AddMenuEntry(
-		FText::FromString(TEXT("TODO List")),
-		FText::FromString(TEXT("Display a list of things to do.")),
+		FText::FromString(TEXT("Trello")),
+		FText::FromString(TEXT("Open the Trello Board.")),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("Level.SaveModifiedHighlightIcon16x")),
 		FUIAction(FExecuteAction::CreateLambda([]() -> void
 			{
-				FString ToDoList {};
-
-				if (UTinyRogueEditorSettings::Get()->ToDoList.IsEmpty() == false)
+				const FString TrelloUrl {TEXT("https://trello.com/b/e9QI4VD0/tinyrogue")};	
+				if (UKismetSystemLibrary::CanLaunchURL(TrelloUrl) == false)
 				{
-					for (const FString& Todo : UTinyRogueEditorSettings::Get()->ToDoList)
-					{
-						ToDoList.Append(FString::Printf(TEXT("- %s\n"), *Todo));
-					}
-					ToDoList.RemoveAt(ToDoList.Len() - 1, 1);
-				}
-				else
-				{
-					ToDoList = TEXT("There are no TODOs to display.");
+					LOG_ERROR("Failed to open Trello.");
+					return;
 				}
 
-				FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::Ok, FText::FromString(ToDoList), FText::FromString({TEXT("TODO List")}));
+				UKismetSystemLibrary::LaunchURL(TrelloUrl);
 			}
 		)),
 		TEXT("ShowToDosListButton"));
+	
 }
 
 #undef LOCTEXT_NAMESPACE

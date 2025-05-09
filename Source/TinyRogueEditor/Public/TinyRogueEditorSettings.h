@@ -16,7 +16,4 @@ public:
 
 	UPROPERTY(Config, BlueprintReadOnly, EditDefaultsOnly, meta=(RelativePath))
 	FDirectoryPath PackagedBuildDirectoryPath;
-
-	UPROPERTY(Config, EditDefaultsOnly)
-	TArray<FString> ToDoList;
 };
