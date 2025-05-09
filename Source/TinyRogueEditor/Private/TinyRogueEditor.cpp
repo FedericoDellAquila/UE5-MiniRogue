@@ -209,19 +209,24 @@ void FTinyRogueEditorModule::PackageProjectButton(FMenuBuilder& MenuBuilder)
 
 void FTinyRogueEditorModule::OpenTrelloButton(FMenuBuilder& MenuBuilder)
 {
+	const FString TrelloUrl {UTinyRogueEditorSettings::Get()->TrelloUrl};
+	if (TrelloUrl.IsEmpty())
+	{
+		LOG_ERROR("Trello URL is empty.");
+		return;
+	}
+	
 	MenuBuilder.AddMenuEntry(
 		FText::FromString(TEXT("Trello")),
 		FText::FromString(TEXT("Open the Trello Board.")),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("Level.SaveModifiedHighlightIcon16x")),
-		FUIAction(FExecuteAction::CreateLambda([]() -> void
+		FUIAction(FExecuteAction::CreateLambda([TrelloUrl]() -> void
 			{
-				const FString TrelloUrl {TEXT("https://trello.com/b/e9QI4VD0/tinyrogue")};	
 				if (UKismetSystemLibrary::CanLaunchURL(TrelloUrl) == false)
 				{
-					LOG_ERROR("Failed to open Trello.");
+					LOG_ERROR("Can't open Trello board at {0}", TrelloUrl)
 					return;
 				}
-
 				UKismetSystemLibrary::LaunchURL(TrelloUrl);
 			}
 		)),

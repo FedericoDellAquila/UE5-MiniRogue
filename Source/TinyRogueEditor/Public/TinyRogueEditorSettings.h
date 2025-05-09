@@ -16,4 +16,7 @@ public:
 
 	UPROPERTY(Config, BlueprintReadOnly, EditDefaultsOnly, meta=(RelativePath))
 	FDirectoryPath PackagedBuildDirectoryPath;
+
+	UPROPERTY(Config, BlueprintReadOnly, EditDefaultsOnly)
+	FString TrelloUrl;
 };

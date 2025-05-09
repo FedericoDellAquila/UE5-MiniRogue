@@ -2,6 +2,7 @@
 
 UTinyRogueEditorSettings::UTinyRogueEditorSettings()
 	: PackagedBuildDirectoryPath{FPaths::Combine(FPaths::ProjectDir(), TEXT("PackagedBuild"))}
+	, TrelloUrl{TEXT("https://trello.com/b/e9QI4VD0/tinyrogue")}
 {
 	CategoryName = TEXT("TinyRogue");
 }
