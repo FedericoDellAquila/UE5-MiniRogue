@@ -5,6 +5,11 @@ UCommand::UCommand()
 	: bIsBeingExecuted(false)
 {}
 
+void UCommand::Update_Implementation(const float DeltaTime)
+{
+	
+}
+
 void UCommand::Execute_Implementation()
 {
 	bIsBeingExecuted = true;

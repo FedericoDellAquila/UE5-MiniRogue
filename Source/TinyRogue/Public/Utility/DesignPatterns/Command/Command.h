@@ -18,6 +18,9 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
 	void Finish();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
+	void Update(const float DeltaTime);
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
 	void Undo();
@@ -29,5 +32,6 @@ public:
 	UCommandSubsystem* GetCommandSubsystem() const;
 	
 protected:
+	
 	bool bIsBeingExecuted;
 };

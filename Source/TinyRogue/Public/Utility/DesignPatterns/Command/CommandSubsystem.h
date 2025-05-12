@@ -6,7 +6,7 @@
 class UCommand;
 
 UCLASS()
-class TINYROGUE_API UCommandSubsystem : public UGameInstanceSubsystem
+class TINYROGUE_API UCommandSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -14,11 +14,14 @@ public:
 	static UCommandSubsystem* Get(const UObject* WorldContextObject);
 	
 	UFUNCTION(BlueprintCallable)
-	bool Enqueue(UCommand* Command, UCommand*& OutCommand);
+	bool Enqueue(UCommand* Command);
 
 	UFUNCTION(BlueprintCallable)
-	bool Dequeue(UCommand*& OutCommand);
+	bool Dequeue();
 	
 private:
-	TQueue<UCommand*> CommandQueue;
+	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override;
+
+	TQueue<TObjectPtr<UCommand>> CommandQueue;
 };

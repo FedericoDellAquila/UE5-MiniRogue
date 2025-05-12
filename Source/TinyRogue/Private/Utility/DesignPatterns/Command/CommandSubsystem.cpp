@@ -4,24 +4,54 @@
 UCommandSubsystem* UCommandSubsystem::Get(const UObject* WorldContextObject)
 {
 	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
-	return World->GetGameInstance()->GetSubsystem<UCommandSubsystem>();
+	return World->GetSubsystem<UCommandSubsystem>();
 }
 
-bool UCommandSubsystem::Enqueue(UCommand* Command, UCommand*& OutCommand)
+bool UCommandSubsystem::Enqueue(UCommand* Command)
 {
 	if (IsValid(Command) == false)
 		return false;
 	
 	CommandQueue.Enqueue(Command);
-	OutCommand = Command;
 	return true;
 }
 
-bool UCommandSubsystem::Dequeue(UCommand*& OutCommand)
+bool UCommandSubsystem::Dequeue()
 {
 	if (CommandQueue.IsEmpty())
 		return false;
 	
-	CommandQueue.Dequeue(OutCommand);
+	TObjectPtr<UCommand> CommandPtr {nullptr};
+	CommandQueue.Dequeue(CommandPtr);
+	if (CommandPtr == nullptr)
+		return false;
+
+	UCommand* Command {CommandPtr.Get()};
+	if (IsValid(Command) == false)
+		return false;
+	
+	Command->MarkAsGarbage();
+	Command->ConditionalBeginDestroy();
 	return true;
+}
+
+void UCommandSubsystem::Tick(float DeltaTime)
+{
+	if (CommandQueue.IsEmpty())
+		return;
+
+	TObjectPtr<UCommand>* CommandPtr {CommandQueue.Peek()};
+	if (CommandPtr == nullptr)
+		return;
+
+	UCommand* Command {*CommandPtr};
+	if (IsValid(Command) == false)
+		return;
+	
+	Command->Update(DeltaTime);
+}
+
+TStatId UCommandSubsystem::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UCommandSubsystem, STATGROUP_Tickables);
 }
