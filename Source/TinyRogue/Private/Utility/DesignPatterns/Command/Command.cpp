@@ -19,6 +19,8 @@ void UCommand::Finish_Implementation()
 {
 	bIsBeingExecuted = false;
 	// Notify UCommandSubsystem
+
+	OnFinished.Broadcast(this);
 }
 
 void UCommand::Undo_Implementation()

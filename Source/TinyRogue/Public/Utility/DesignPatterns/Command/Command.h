@@ -5,6 +5,8 @@
 
 class UCommandSubsystem;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCommandDelegate, UCommand*, Command);
+
 UCLASS(Blueprintable, BlueprintType, Abstract)
 class TINYROGUE_API UCommand : public UWorldObject
 {
@@ -12,6 +14,9 @@ class TINYROGUE_API UCommand : public UWorldObject
 
 public:
 	UCommand();
+
+	UPROPERTY(BlueprintAssignable, Category="TinyRogue|Command")
+	FOnCommandDelegate OnFinished;
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="TinyRogue|Command")
 	void Execute();

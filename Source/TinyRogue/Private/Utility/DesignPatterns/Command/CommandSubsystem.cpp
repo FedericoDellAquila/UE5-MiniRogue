@@ -3,7 +3,16 @@
 
 UCommandSubsystem* UCommandSubsystem::Get(const UObject* WorldContextObject)
 {
+	if (IsValid(WorldContextObject) == false)
+		return nullptr;
+
+	if (IsValid(GEngine) == false)
+		return nullptr;
+	
 	const UWorld* World {GEngine->GetWorldFromContextObjectChecked(WorldContextObject)};
+	if (IsValid(World) == false)
+		return nullptr;
+	
 	return World->GetSubsystem<UCommandSubsystem>();
 }
 
@@ -12,43 +21,51 @@ bool UCommandSubsystem::Enqueue(UCommand* Command)
 	if (IsValid(Command) == false)
 		return false;
 	
-	CommandQueue.Enqueue(Command);
-	return true;
+	return CommandQueue.Enqueue(Command);
 }
 
 bool UCommandSubsystem::Dequeue()
 {
-	if (CommandQueue.IsEmpty())
+	if (CommandQueue.IsEmpty() || IsValid(CurrentCommand))
 		return false;
 	
-	TObjectPtr<UCommand> CommandPtr {nullptr};
-	CommandQueue.Dequeue(CommandPtr);
-	if (CommandPtr == nullptr)
+	if (CommandQueue.Dequeue(CurrentCommand) == false)
 		return false;
 
-	UCommand* Command {CommandPtr.Get()};
-	if (IsValid(Command) == false)
-		return false;
-	
-	Command->MarkAsGarbage();
-	Command->ConditionalBeginDestroy();
+	CurrentCommand->OnFinished.AddUniqueDynamic(this, &UCommandSubsystem::DestroyCommand);
+	CurrentCommand->Execute();
 	return true;
 }
 
-void UCommandSubsystem::Tick(float DeltaTime)
+void UCommandSubsystem::ConsumeCommands()
 {
 	if (CommandQueue.IsEmpty())
 		return;
 
-	TObjectPtr<UCommand>* CommandPtr {CommandQueue.Peek()};
-	if (CommandPtr == nullptr)
-		return;
+	Dequeue();
+}
 
-	UCommand* Command {*CommandPtr};
-	if (IsValid(Command) == false)
+void UCommandSubsystem::DestroyCommand(UCommand*)
+{
+	if (IsValid(CurrentCommand) == false)
 		return;
 	
-	Command->Update(DeltaTime);
+	CurrentCommand->RemoveFromRoot();
+	CurrentCommand->MarkAsGarbage();
+	CurrentCommand->ConditionalBeginDestroy();
+	CurrentCommand = nullptr;
+
+	ConsumeCommands();
+}
+
+bool UCommandSubsystem::IsTickable() const
+{
+	return IsValid(CurrentCommand);
+}
+
+void UCommandSubsystem::Tick(float DeltaTime)
+{
+	CurrentCommand->Update(DeltaTime);
 }
 
 TStatId UCommandSubsystem::GetStatId() const

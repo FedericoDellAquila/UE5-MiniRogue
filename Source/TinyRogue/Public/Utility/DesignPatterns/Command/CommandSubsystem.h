@@ -18,10 +18,21 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool Dequeue();
+
+	UFUNCTION(BlueprintCallable)
+	void ConsumeCommands();
+
+protected:
+	UFUNCTION()
+	virtual void DestroyCommand(UCommand* Command);
 	
 private:
+	virtual bool IsTickable() const override;
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
 
 	TQueue<TObjectPtr<UCommand>> CommandQueue;
+
+	UPROPERTY()
+	TObjectPtr<UCommand> CurrentCommand;
 };
